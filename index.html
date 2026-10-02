@@ -1,0 +1,1670 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Laboratorio virtual de metalurgia de polvos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E7EBEE; --surface:#FFFFFF; --surface-2:#F3F5F7; --ink:#18212B; --ink-2:#4B5866; --line:#C9D1D9;
+  --steel:#1B3B46; --steel-2:#22798F; --accent:#C8642B; --accent-ink:#FFFFFF;
+  --ok:#2A7A4B; --warn:#A96400; --bad:#B3261E; --sheet:#8C9BAA; --tool:#3A4654; --tool-2:#5B6877;
+  --c1:#2F5E93; --c2:#C0392B; --c3:#2A7A4B; --c4:#8E44AD; --c5:#D68910;
+  --radius-l:10px; --radius-s:4px;
+  --font:"Archivo", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#11161C; --surface:#19212A; --surface-2:#202A35; --ink:#E4E9EE; --ink-2:#9CAEBF; --line:#2E3A47;
+    --steel:#8CCBD8; --steel-2:#5FB3C6; --accent:#F08A4B; --accent-ink:#1A0A00;
+    --ok:#5CC08A; --warn:#F0A840; --bad:#F2766D; --sheet:#9AAAB9; --tool:#5A6878; --tool-2:#7A8898;
+    --c1:#6EA0DA; --c2:#F2766D; --c3:#5CC08A; --c4:#C39BD3; --c5:#F5B041;
+  }
+}
+:root[data-theme="dark"]{
+    --bg:#11161C; --surface:#19212A; --surface-2:#202A35; --ink:#E4E9EE; --ink-2:#9CAEBF; --line:#2E3A47;
+    --steel:#8CCBD8; --steel-2:#5FB3C6; --accent:#F08A4B; --accent-ink:#1A0A00;
+    --ok:#5CC08A; --warn:#F0A840; --bad:#F2766D; --sheet:#9AAAB9; --tool:#5A6878; --tool-2:#7A8898;
+    --c1:#6EA0DA; --c2:#F2766D; --c3:#5CC08A; --c4:#C39BD3; --c5:#F5B041;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.5;font-variant-numeric:tabular-nums}
+h1,h2,h3,h4{font-stretch:78%;line-height:1.15;margin:0}
+h2{font-size:1.6rem;font-weight:750}
+h3{font-size:1.05rem;font-weight:700}
+p{margin:.4em 0 .8em}
+a{color:var(--steel-2)}
+button,select,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+img,canvas{max-width:100%}
+
+/* ---------- header ---------- */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--steel);color:#fff;display:flex;align-items:center;gap:18px;padding:10px 20px;flex-wrap:wrap}
+:root[data-theme="dark"] .top{background:#0C1116;color:var(--ink)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .top{background:#0C1116;color:var(--ink)}}
+.brand h1{font-size:1.35rem;font-weight:800;font-stretch:70%;letter-spacing:.01em}
+.brand p{margin:0;font-size:.82rem;opacity:.78}
+.tabs{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap}
+.tabs button{background:transparent;border:1px solid rgba(255,255,255,.28);color:inherit;padding:7px 14px;border-radius:999px;cursor:pointer;font-weight:600;font-size:.9rem}
+.tabs button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.iconbtn{background:transparent;border:1px solid rgba(255,255,255,.28);color:inherit;border-radius:999px;width:36px;height:36px;cursor:pointer;font-size:1rem}
+main{max-width:1440px;margin:0 auto;padding:18px 20px 60px}
+.tab{display:none}
+.tab.active{display:block}
+
+/* ---------- info buttons & dialog ---------- */
+.i{display:inline-grid;place-items:center;width:19px;height:19px;border-radius:50%;border:1.5px solid var(--steel-2);color:var(--steel-2);background:transparent;font-size:.72rem;font-weight:800;font-style:italic;font-family:Georgia,serif;cursor:pointer;padding:0;flex:0 0 auto;vertical-align:middle;line-height:1}
+.i:hover{background:var(--steel-2);color:#fff}
+dialog#info{border:none;border-radius:var(--radius-l);padding:0;max-width:560px;width:calc(100% - 32px);background:var(--surface);color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.35)}
+dialog#info::backdrop{background:rgba(10,20,30,.45)}
+.dlg-head{background:var(--steel);color:#fff;padding:14px 18px;display:flex;gap:12px;align-items:flex-start}
+:root[data-theme="dark"] .dlg-head{background:#0C1116}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .dlg-head{background:#0C1116}}
+.dlg-head h3{font-size:1.25rem}
+.dlg-head .sym{font-family:Georgia,"Times New Roman",serif;font-style:italic;opacity:.85;font-size:1rem;margin-top:2px}
+.dlg-head button{margin-left:auto;background:transparent;border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:999px;width:32px;height:32px;cursor:pointer}
+.dlg-body{padding:14px 18px 18px;max-height:65vh;overflow:auto}
+.dlg-body h4{font-size:.95rem;margin:12px 0 2px;color:var(--steel-2)}
+.dlg-body .now{background:var(--surface-2);border-left:4px solid var(--accent);padding:8px 12px;border-radius:var(--radius-s);margin-bottom:6px}
+.eq{font-family:Georgia,"Times New Roman",serif;font-style:italic;background:var(--surface-2);padding:6px 10px;border-radius:var(--radius-s);display:block;margin:6px 0;overflow-x:auto;white-space:nowrap}
+
+/* ---------- lab ---------- */
+.procbar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.procbtn{display:flex;align-items:center;gap:12px;text-align:left;background:var(--surface);border:1.5px solid var(--line);border-radius:var(--radius-l);padding:10px 12px;cursor:pointer}
+.procbtn svg{flex:0 0 46px;height:36px}
+.procbtn b{display:block;font-stretch:80%;font-size:1.02rem}
+.procbtn span{font-size:.8rem;color:var(--ink-2)}
+.procbtn[aria-pressed="true"]{border-color:var(--steel-2);box-shadow:inset 0 0 0 1.5px var(--steel-2);background:var(--surface-2)}
+.lab-grid>*{min-width:0}
+.lab-grid{display:grid;grid-template-columns:330px minmax(0,1fr);gap:16px;align-items:start}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-l)}
+.inputs{padding:4px 0}
+.grp{padding:12px 16px;border-bottom:1px solid var(--line)}
+.grp:last-child{border-bottom:none}
+.grp > h3,.grp > summary{margin-bottom:8px;display:flex;align-items:center;gap:8px}
+details.grp > summary{cursor:pointer;font-weight:700;font-stretch:78%;font-size:1.05rem;list-style:none}
+details.grp > summary::before{content:"▸";color:var(--steel-2)}
+details.grp[open] > summary::before{content:"▾"}
+.field{display:grid;grid-template-columns:minmax(0,1fr) 108px;align-items:center;gap:6px 8px;margin:7px 0}
+.field label{display:flex;align-items:center;gap:6px;font-size:.88rem}
+.field label .sy{font-family:Georgia,serif;font-style:italic;color:var(--ink-2)}
+.inwrap{display:flex;align-items:center;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--radius-s)}
+.inwrap input,.inwrap select{width:100%;min-width:0;border:none;background:transparent;padding:6px 6px;text-align:right}
+.inwrap select{text-align:left}
+.inwrap .u{font-size:.75rem;color:var(--ink-2);padding-right:6px;white-space:nowrap}
+.field.wide{grid-template-columns:1fr}
+.field.chk{grid-template-columns:auto 1fr}
+select.big{width:100%;padding:8px;border:1px solid var(--line);border-radius:var(--radius-s);background:var(--surface-2)}
+.matprops{display:grid;grid-template-columns:1fr 1fr;gap:2px 12px;margin-top:8px;font-size:.82rem}
+.matprops div{display:flex;align-items:center;gap:5px;justify-content:space-between;border-bottom:1px dotted var(--line);padding:2px 0}
+.matprops div span:first-child{display:flex;gap:5px;align-items:center;color:var(--ink-2)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--surface-2);border-radius:999px;padding:5px 11px;font-size:.84rem;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--steel-2);color:#fff;border-color:var(--steel-2)}
+.exdesc{font-size:.84rem;color:var(--ink-2);margin:8px 0 0}
+
+.stage{overflow:hidden}
+.stage-head{display:flex;align-items:center;gap:12px;padding:12px 16px;flex-wrap:wrap}
+.stage-head h2{font-size:1.35rem}
+.stage-head .sub{color:var(--ink-2);font-size:.88rem}
+.hazard{height:6px;background:linear-gradient(90deg,var(--accent) 0 30%,#E7B34C 30% 55%,var(--steel-2) 55% 100%)}
+#sim{display:block;width:100%;height:380px;background:var(--surface-2)}
+.ctrl{display:flex;align-items:center;gap:12px;padding:10px 16px;flex-wrap:wrap;border-top:1px solid var(--line)}
+.play{background:var(--steel);color:#fff;border:none;border-radius:999px;padding:8px 18px;font-weight:700;cursor:pointer;min-width:110px}
+:root[data-theme="dark"] .play{color:#0C1116}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .play{color:#0C1116}}
+.ctrl input[type=range]{flex:1;min-width:160px;accent-color:var(--accent)}
+.ctrl .lbl{font-size:.85rem;color:var(--ink-2);min-width:180px}
+.verdict{display:flex;gap:12px;align-items:flex-start;padding:12px 16px;border-top:1px solid var(--line)}
+.verdict .badge{font-weight:800;font-stretch:78%;padding:4px 12px;border-radius:999px;white-space:nowrap}
+.badge.ok{background:color-mix(in srgb,var(--ok) 18%,transparent);color:var(--ok)}
+.badge.warn{background:color-mix(in srgb,var(--warn) 20%,transparent);color:var(--warn)}
+.badge.bad{background:color-mix(in srgb,var(--bad) 18%,transparent);color:var(--bad)}
+.warnlist{margin:0;padding:0;list-style:none;font-size:.88rem;display:grid;gap:4px}
+.warnlist li{display:flex;gap:8px}
+.warnlist li::before{content:"";flex:0 0 9px;height:9px;border-radius:50%;margin-top:6px;background:var(--ok)}
+.warnlist li.warn::before{background:var(--warn)}
+.warnlist li.bad::before{background:var(--bad)}
+
+.sec{margin-top:16px}
+.sec > h3{margin:0 0 8px 2px;display:flex;gap:8px;align-items:center}
+.results{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px}
+.rgroup{grid-column:1/-1;font-weight:700;font-stretch:80%;color:var(--ink-2);margin-top:6px;font-size:.92rem}
+.rcard{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--steel-2);border-radius:var(--radius-s);padding:8px 10px}
+.rcard.warn{border-left-color:var(--warn)}
+.rcard.bad{border-left-color:var(--bad)}
+.rcard.ok{border-left-color:var(--ok)}
+.rcard .t{display:flex;justify-content:space-between;align-items:flex-start;gap:6px;font-size:.8rem;color:var(--ink-2)}
+.rcard .v{font-size:1.3rem;font-weight:700;font-stretch:85%}
+.rcard .v small{font-size:.78rem;font-weight:500;color:var(--ink-2);margin-left:3px}
+.charts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.chartbox{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-l);padding:10px 10px 6px}
+.chartbox h4{display:flex;gap:8px;align-items:center;font-size:.95rem;margin:0 0 4px 4px}
+.chartbox canvas{display:block;width:100%;height:250px}
+.costwrap{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:12px}
+.costbar{display:flex;height:28px;border-radius:var(--radius-s);overflow:hidden;margin:6px 0 10px}
+.costbar div{height:100%}
+table.tbl{width:100%;border-collapse:collapse;font-size:.88rem}
+.tbl th,.tbl td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.tbl td.n,.tbl th.n{text-align:right}
+.tbl th{font-weight:700;color:var(--ink-2);font-size:.82rem}
+.tblwrap{overflow-x:auto}
+.sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:middle}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.btn{border:1.5px solid var(--steel-2);background:var(--surface);color:var(--steel-2);border-radius:999px;padding:8px 16px;font-weight:700;cursor:pointer}
+.btn.primary{background:var(--steel-2);color:#fff}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:999px;font-size:.9rem;opacity:0;pointer-events:none;transition:opacity .25s}
+.toast.show{opacity:1}
+
+/* ---------- guide ---------- */
+.guide{display:grid;grid-template-columns:230px minmax(0,1fr);gap:18px;align-items:start}
+.gnav{position:sticky;top:calc(80px + env(safe-area-inset-top,0px));padding:8px}
+.gnav button{display:block;width:100%;text-align:left;border:none;background:transparent;padding:8px 10px;border-radius:var(--radius-s);cursor:pointer;font-size:.92rem}
+.gnav button[aria-current="true"]{background:var(--surface-2);font-weight:700;color:var(--steel-2)}
+.gbody{padding:22px 28px;max-width:none}
+.gbody article{display:none;max-width:78ch}
+.gbody article.active{display:block}
+.gbody h2{margin-bottom:6px}
+.gbody h3{margin:20px 0 6px;color:var(--steel-2)}
+.gbody .lead{font-size:1.05rem;color:var(--ink-2)}
+.gbody ol,.gbody ul{padding-left:1.3em}
+.gbody li{margin:3px 0}
+.gcanvas{width:100%;height:230px;display:block;background:var(--surface-2);border-radius:var(--radius-l);margin:10px 0}
+.callout{border-left:4px solid var(--accent);background:var(--surface-2);padding:10px 14px;border-radius:var(--radius-s);margin:12px 0}
+.gotolab{margin-top:14px}
+
+/* ---------- materials ---------- */
+.matgrid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:16px;align-items:start}
+.matform{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;padding:14px 16px}
+.matform label{font-size:.82rem;color:var(--ink-2);display:grid;gap:2px}
+.matform input{border:1px solid var(--line);background:var(--surface-2);border-radius:var(--radius-s);padding:6px}
+
+/* ---------- report ---------- */
+.rep-tools{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.report{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-l);padding:28px 34px;max-width:1000px}
+.report h2{font-size:1.7rem}
+.report h3{margin:22px 0 8px;color:var(--steel-2);border-bottom:2px solid var(--line);padding-bottom:4px}
+.rep-meta{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:14px 0}
+.rep-meta label{font-size:.8rem;color:var(--ink-2);display:grid;gap:2px}
+.rep-meta input{border:1px solid var(--line);background:var(--surface-2);border-radius:var(--radius-s);padding:6px}
+.rep-imgs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.rep-imgs figure{margin:0;border:1px solid var(--line);border-radius:var(--radius-s);padding:6px;background:var(--surface)}
+.rep-imgs figcaption{font-size:.8rem;color:var(--ink-2)}
+.report textarea{width:100%;min-height:110px;border:1px solid var(--line);background:var(--surface-2);border-radius:var(--radius-s);padding:8px}
+.empty{color:var(--ink-2);font-style:italic}
+
+
+.geobar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;margin-bottom:14px}
+.geobtn{display:flex;flex-direction:column;align-items:center;gap:4px;background:var(--surface);border:1.5px solid var(--line);border-radius:var(--radius-l);padding:8px 6px;cursor:pointer;font-size:.8rem;font-weight:600;text-align:center}
+.geobtn svg{width:64px;height:30px}
+.geobtn[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1.5px var(--accent);background:var(--surface-2)}
+.hud{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:1px;background:var(--line);border-top:1px solid var(--line)}
+.hud div{background:var(--surface);padding:6px 10px;font-size:.78rem;color:var(--ink-2)}
+.hud b{display:block;font-size:1rem;color:var(--ink);font-stretch:85%}
+.speed{display:flex;align-items:center;gap:6px;font-size:.82rem;color:var(--ink-2)}
+.speed select{border:1px solid var(--line);background:var(--surface-2);border-radius:4px;padding:4px}
+.diag{display:grid;gap:8px}
+.dcard{background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--ok);border-radius:var(--radius-s);padding:8px 12px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:4px 16px}
+.dcard.info{border-left-color:var(--steel-2)} .dcard.warn{border-left-color:var(--warn)} .dcard.bad{border-left-color:var(--bad)}
+.dcard .f{font-weight:700}
+.dcard .c{font-size:.84rem;color:var(--ink-2)}
+.dcard .m{font-size:.86rem;grid-row:1/3;grid-column:2}
+.dcard .m::before{content:"Mejora: ";font-weight:700;color:var(--ok)}
+pre.gcode{background:#12181E;color:#CFE3D0;padding:14px 16px;border-radius:var(--radius-l);overflow:auto;max-height:420px;font:13px/1.45 "Consolas","Menlo","DejaVu Sans Mono",monospace;margin:0}
+pre.gcode .cm{color:#7F9AA8} pre.gcode .gc{color:#F2C230} pre.gcode .tc{color:#F0605A}
+.charts2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.charts2 canvas{display:block;width:100%;height:270px}
+.mini{font-size:.8rem;color:var(--ink-2)}
+.toolcard{margin-top:6px;font-size:.8rem;color:var(--ink-2);background:var(--surface-2);border-radius:4px;padding:6px 8px}
+.btn.sm{padding:4px 10px;font-size:.82rem}
+.iso{display:flex;gap:4px;flex-wrap:wrap;margin:8px 0}
+.iso span{background:var(--surface-2);border:1px solid var(--line);border-radius:4px;padding:4px 7px;font-weight:700;text-align:center}
+.iso span small{display:block;font-weight:400;font-size:.7rem;color:var(--ink-2)}
+
+.procbar{grid-template-columns:repeat(6,minmax(0,1fr))}
+.procbtn{flex-direction:column;align-items:flex-start;gap:4px;padding:8px 10px}
+.procbtn svg{flex:0 0 auto;width:100%;height:30px}
+.procbtn b{font-size:.92rem}
+.geobar{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:8px;margin-bottom:14px}
+.geobtn{display:flex;flex-direction:column;align-items:center;gap:4px;background:var(--surface);border:1.5px solid var(--line);border-radius:var(--radius-l);padding:8px 4px;cursor:pointer;font-size:.76rem;font-weight:600;text-align:center;line-height:1.2}
+.geobtn svg{width:56px;height:34px}
+.geobtn[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1.5px var(--accent);background:var(--surface-2)}
+.simtools{display:flex;align-items:center;gap:10px;padding:8px 16px;flex-wrap:wrap;border-top:1px solid var(--line)}
+.simtools select{border:1px solid var(--line);background:var(--surface-2);border-radius:4px;padding:5px 8px}
+.simtools label.ck{display:flex;align-items:center;gap:5px;font-size:.84rem;color:var(--ink-2)}
+.cbar{display:flex;align-items:center;gap:8px;padding:6px 16px;font-size:.78rem;color:var(--ink-2)}
+.cbar canvas{flex:1;height:12px;border-radius:6px;border:1px solid var(--line)}
+.hud{grid-template-columns:repeat(6,minmax(0,1fr))}
+.stagebar{display:flex;gap:0;padding:0 16px 10px}
+.stagebar div{flex:1;text-align:center;font-size:.74rem;padding:4px 2px;border-bottom:3px solid var(--line);color:var(--ink-2)}
+.stagebar div.on{border-bottom-color:var(--accent);color:var(--ink);font-weight:700}
+.probe{display:grid;grid-template-columns:200px minmax(0,1fr);gap:14px;padding:12px 16px;align-items:start}
+.probe canvas{width:200px;height:200px;border-radius:var(--radius-l);border:1px solid var(--line);background:#141C24}
+.probe .pv{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px 10px}
+.probe .pv div{font-size:.76rem;color:var(--ink-2)}
+.probe .pv b{display:block;font-size:.98rem;color:var(--ink)}
+.charts3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.charts3 canvas{display:block;width:100%;height:250px}
+.powgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+.powgrid canvas{display:block;width:100%}
+.morph{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.mcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-l);padding:8px 10px;font-size:.8rem;color:var(--ink-2)}
+.mcard svg{width:100%;height:86px;background:#141C24;border-radius:8px}
+.mcard b{display:block;color:var(--ink);font-size:.9rem;margin:6px 0 2px}
+.mini2{font-size:.8rem;color:var(--ink-2)}
+.rowbtn{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.frac{border:1px solid var(--line);border-radius:var(--radius-s);padding:6px 8px;margin:6px 0;background:var(--surface-2)}
+.frac h4{font-size:.85rem;margin:0 0 2px;color:var(--steel-2)}
+.gcanvas{height:240px}
+.cap{font-size:.82rem;color:var(--ink-2);margin:4px 0 12px}
+@media (max-width:1100px){.procbar{grid-template-columns:repeat(3,minmax(0,1fr))}.geobar{grid-template-columns:repeat(4,minmax(0,1fr))}.charts3{grid-template-columns:repeat(2,minmax(0,1fr))}.hud{grid-template-columns:repeat(3,minmax(0,1fr))}.morph{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:860px){.procbar{grid-template-columns:repeat(2,minmax(0,1fr))}.geobar{grid-template-columns:repeat(4,minmax(0,1fr))}.charts3,.powgrid{grid-template-columns:1fr}.probe{grid-template-columns:1fr}.probe canvas{width:100%;max-width:260px}.morph{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:1100px){.geobar{grid-template-columns:repeat(4,minmax(0,1fr))}.hud{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:860px){.charts2{grid-template-columns:1fr}.dcard{grid-template-columns:1fr}.dcard .m{grid-row:auto;grid-column:auto}.geobar{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:1100px){
+  .charts{grid-template-columns:1fr 1fr}
+  .procbar{grid-template-columns:1fr 1fr}
+}
+@media (max-width:860px){
+  .lab-grid,.guide,.matgrid,.costwrap{grid-template-columns:1fr}
+  .gnav{position:static;display:flex;flex-wrap:wrap}
+  .gnav button{width:auto}
+  .charts{grid-template-columns:1fr}
+  .rep-meta,.rep-imgs{grid-template-columns:1fr}
+  .report{padding:18px}
+  .gbody{padding:16px}
+  #sim{height:300px}
+  .tabs{margin-left:0}
+  .top{position:static;padding:10px 14px;gap:8px}
+  .brand p,.procbtn span span{display:none}
+  .tabs button{padding:6px 11px;font-size:.85rem}
+  main{padding:12px 12px 50px}
+}
+@media (prefers-reduced-motion: reduce){ .toast{transition:none} }
+@media print{
+  .top,.rep-tools,#tab-lab,#tab-guia,#tab-mat,#tab-pol,#tab-mat{display:none!important}
+  #tab-rep{display:block!important}
+  body{background:#fff;color:#000}
+  main{padding:0}
+  .report{border:none;padding:0;max-width:none}
+  .report input,.report textarea{border:none;background:transparent}
+  .rep-imgs figure,.tbl tr{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand"><h1>Metalurgia de polvos</h1><p>Laboratorio virtual: polvos, compactación, sinterizado y procesos asistidos</p></div>
+  <nav class="tabs" role="tablist" aria-label="Secciones">
+    <button role="tab" data-tab="guia" aria-selected="false">Guía</button>
+    <button role="tab" data-tab="lab" aria-selected="true">Laboratorio</button>
+    <button role="tab" data-tab="pol" aria-selected="false">Polvos</button>
+    <button role="tab" data-tab="mat" aria-selected="false">Materiales</button>
+    <button role="tab" data-tab="rep" aria-selected="false">Informe</button>
+  </nav>
+  <button class="iconbtn" id="themeBtn" title="Cambiar tema claro u oscuro" aria-label="Cambiar tema claro u oscuro">◐</button>
+</header>
+<main>
+<!-- ===================== GUÍA ===================== -->
+<section class="tab" id="tab-guia" role="tabpanel">
+ <div class="guide">
+  <nav class="panel gnav" id="gnav" aria-label="Temas de la guía">
+   <button data-g="intro" aria-current="true">La metalurgia de polvos</button>
+   <button data-g="polvos">El polvo: forma y tamaño</button>
+   <button data-g="mezcla">Mezclas de tamaños</button>
+   <button data-g="compact">Compactación y esfuerzos</button>
+   <button data-g="sinter">Sinterizado y calor</button>
+   <button data-g="procesos">Los seis procesos</button>
+   <button data-g="prop">Propiedades y porosidad</button>
+   <button data-g="fallas">Fallas típicas y mejoras</button>
+   <button data-g="seg">Seguridad con polvos</button>
+   <button data-g="uso">Cómo usar el laboratorio</button>
+   <button data-g="refs">Referencias y laboratorios afines</button>
+  </nav>
+  <div class="panel gbody">
+   <article data-g="intro" class="active">
+    <h2>La metalurgia de polvos</h2>
+    <p class="lead">Se parte de un polvo metálico, se le da forma comprimiéndolo o inyectándolo y luego se calienta por debajo del punto de fusión para que las partículas se unan por difusión. Se fabrican engranajes, cojinetes autolubricados, filtros, herramientas de corte, implantes y piezas de superaleación que serían muy caras de mecanizar.</p>
+    <canvas class="gcanvas" data-ex="1" data-fr="0.22" data-fld="sigma" data-vec="1" aria-label="Prensado de un piñón con flujo de esfuerzos"></canvas>
+    <p class="cap">Sección de un piñón con cubo durante el prensado. Los colores muestran el esfuerzo axial y las flechas el flujo de esfuerzos: axial (azul), lateral (verde) y fricción con la pared (rojo).</p>
+    <h3>La cadena de proceso</h3>
+    <ol><li><b>Producción del polvo:</b> atomización con gas o agua, electrólisis, reducción de óxidos, carbonilo o molienda.</li><li><b>Mezcla:</b> se combinan tamaños, aleantes y lubricante.</li><li><b>Conformado:</b> prensado en matriz, isostático, inyección o prensado en caliente.</li><li><b>Sinterizado:</b> ciclo térmico con atmósfera controlada.</li><li><b>Acabado:</b> calibrado, tratamiento térmico, impregnación o mecanizado.</li></ol>
+    <h3>Por qué se usa</h3>
+    <ul><li>Forma casi final con poco desperdicio (más del 95 % del material se aprovecha).</li><li>Permite materiales que no se pueden fundir bien: tungsteno, carburos, compuestos metal-cerámica.</li><li>Permite controlar la porosidad a propósito (cojinetes, filtros).</li><li>Es económica en series largas por la larga vida del herramental.</li></ul>
+   </article>
+   <article data-g="polvos">
+    <h2>El polvo: forma y tamaño</h2>
+    <p class="lead">La forma de las partículas depende de cómo se fabricó el polvo, y define casi todo lo que ocurre después.</p>
+    <div class="morph" id="gMorph"></div>
+    <h3>Tamaño de partícula</h3>
+    <p>Se describe con una distribución. Los diámetros d₁₀, d₅₀ y d₉₀ indican los tamaños bajo los cuales está el 10, el 50 y el 90 % del volumen. Para el sinterizado importa el diámetro de Sauter d₃₂, que conserva la relación volumen/superficie: d₃₂ = 1/Σ(yᵢ/dᵢ).</p>
+    <h3>Efectos principales</h3>
+    <ul><li><b>Fluidez:</b> los polvos finos (menores de 20 µm) y muy irregulares no fluyen; se mide con el embudo de Hall (s/50 g).</li><li><b>Densidad aparente:</b> esféricos 50–60 % de la densidad teórica; esponjosos y dendríticos 20–30 %.</li><li><b>Resistencia en verde:</b> los irregulares se traban mecánicamente y son mucho más resistentes que los esféricos.</li><li><b>Sinterizado:</b> la fuerza impulsora es la superficie específica, que crece como 1/d.</li></ul>
+   </article>
+   <article data-g="mezcla">
+    <h2>Mezclas de tamaños</h2>
+    <p class="lead">Un polvo de un solo tamaño deja huecos de 35 a 45 %. Si se agregan partículas más finas que caben en esos huecos, el empaquetamiento sube.</p>
+    <canvas class="gcanvas" data-kind="pack" aria-label="Empaquetamiento de una mezcla bimodal"></canvas>
+    <p class="cap">Empaquetamiento 2D de una mezcla trimodal (escala de tamaños comprimida para verla).</p>
+    <h3>Modelo de empaquetamiento lineal</h3>
+    <p>El laboratorio usa el modelo de De Larrard. Para cada clase i que domina la mezcla, su empaquetamiento virtual es γᵢ = βᵢ / [1 − Σⱼ&lt;ᵢ (1 − βᵢ + bᵢⱼβᵢ(1 − 1/βⱼ))yⱼ − Σⱼ&gt;ᵢ (1 − aᵢⱼβᵢ/βⱼ)yⱼ], y el de la mezcla es el mínimo de los γᵢ. El efecto de pared bᵢⱼ y el de aflojamiento aᵢⱼ dependen solo del cociente de tamaños.</p>
+    <ul><li>Con cociente de tamaños menor que 1/7 los finos rellenan huecos casi sin aflojar la estructura.</li><li>El óptimo binario suele estar entre 20 y 35 % de finos.</li><li>Más finos aumentan el área superficial, que favorece el sinterizado pero empeora el flujo y aumenta la fricción.</li></ul>
+    <p>En la pestaña <b>Polvos</b> puedes diseñar la mezcla y ver la curva de empaquetamiento contra la fracción fina.</p>
+   </article>
+   <article data-g="compact">
+    <h2>Compactación y flujo de esfuerzos</h2>
+    <p class="lead">Al comprimir, el polvo se reacomoda, se deforma plásticamente y se suelda en frío por los puntos de contacto.</p>
+    <canvas class="gcanvas" data-ex="8" data-fr="0.3" data-fld="dens" data-vec="1" aria-label="Gradiente de densidad en una barra esbelta"></canvas>
+    <p class="cap">Barra esbelta con acción simple: la fricción con la pared frena la transmisión de la presión y deja abajo la zona menos densa.</p>
+    <h3>Ecuación de Heckel</h3>
+    <p>ln(1/(1 − D)) = P/P<sub>y</sub> + A. A es el reacomodo inicial y P<sub>y</sub> es la presión de fluencia del polvo: materiales blandos (aluminio, cobre) compactan mucho más que los duros (titanio, tungsteno).</p>
+    <h3>Fricción con la pared (Janssen)</h3>
+    <p>La presión decae con la profundidad: P(z) = P₀·exp(−4μK<sub>r</sub>z/D<sub>h</sub>). μ es el coeficiente de fricción (se reduce con lubricante), K<sub>r</sub> la relación de presión lateral y D<sub>h</sub> el diámetro hidráulico. Con doble acción la zona de menor presión pasa al centro.</p>
+    <h3>Llenado de secciones escalonadas</h3>
+    <p>Si los escalones comparten el mismo recorrido de punzón, las secciones delgadas se compactan de más y las gruesas de menos. Los punzones multinivel ajustan el llenado de cada nivel.</p>
+    <h3>Expulsión</h3>
+    <p>Al salir de la matriz la pieza se expande por la energía elástica almacenada (ε ≈ 0,35·P/E<sub>verde</sub>). Si su resistencia en verde es baja aparecen grietas de laminación.</p>
+   </article>
+   <article data-g="sinter">
+    <h2>Sinterizado y flujo de calor</h2>
+    <p class="lead">Calentando a 0,6–0,9 del punto de fusión los átomos migran hacia los contactos entre partículas y forman cuellos que crecen hasta cerrar los poros.</p>
+    <canvas class="gcanvas" data-kind="micro3" aria-label="Tres etapas de sinterizado"></canvas>
+    <p class="cap">Izquierda: contactos iniciales. Centro: cuellos formados. Derecha: poros cerrándose y granos creciendo.</p>
+    <h3>Crecimiento del cuello</h3>
+    <p>La razón de cuello X/a crece con la difusión: (X/a)ⁿ ∝ t·exp(−Q/RT)/aᵐ. La temperatura pesa exponencialmente (Arrhenius) y el tamaño de partícula, con potencia 3 a 4.</p>
+    <h3>Curva maestra de sinterizado</h3>
+    <p>El laboratorio integra Θ = ∫(1/T)·exp(−Q/RT)dt en cada punto de la pieza, escala con el tamaño (10/d)³ y obtiene el avance de densificación ξ = 1 − exp(−(Θ/Θ₀)^0,7). La densidad final es D = D<sub>base</sub> + ξ·(D<sub>máx</sub> − D<sub>base</sub>).</p>
+    <h3>Flujo de calor</h3>
+    <p>La temperatura se resuelve en la sección con la ecuación de Fourier, ρc·∂T/∂t = ∇·(k∇T) + q, con transferencia de calor por todas las superficies expuestas. El calor fluye de la superficie hacia el centro (flechas naranjas). El centro se retrasa en ΔT ≈ β·L²/(8α): se nota en calentamientos rápidos (SPS), piezas gruesas o materiales poco conductores como el titanio.</p>
+    <h3>Efecto sobre las propiedades</h3>
+    <p>Cada punto acumula su propia historia térmica, así que donde hubo más temperatura hay más cuello, más densidad y más grano. Los gradientes de temperatura se convierten en gradientes de propiedades.</p>
+    <h3>Fase líquida y atmósfera</h3>
+    <p>Por encima de la temperatura de formación de líquido (bronce, Al-Cu, WC-Co) la densificación se acelera mucho. La atmósfera debe reducir los óxidos sin formar compuestos frágiles.</p>
+   </article>
+   <article data-g="procesos">
+    <h2>Los seis procesos</h2>
+    <canvas class="gcanvas" data-ex="3" data-fr="0.42" data-fld="temp" data-vec="1" aria-label="SPS con flujo de calor"></canvas>
+    <p class="cap">Sinterización por plasma de chispa (SPS) calentando con rampa rápida: el centro va por detrás de la superficie y el calor fluye hacia adentro.</p>
+    <ul>
+     <li><b>Prensado y sinterizado:</b> matriz rígida en frío y horno. El proceso más usado en la industria (engranajes y cojinetes).</li>
+     <li><b>Isostático en frío (CIP):</b> molde flexible en fluido a presión; la densidad es uniforme y permite formas más complejas, pero la precisión es menor.</li>
+     <li><b>Prensado en caliente:</b> matriz de grafito con presión y temperatura. Da piezas densas de materiales difíciles y compuestos.</li>
+     <li><b>SPS / FAST:</b> como el prensado en caliente pero con corriente pulsada y rampas de hasta 600 K/min. Ciclos de minutos y grano fino.</li>
+     <li><b>HIP:</b> gas a 100–200 MPa y 0,7–0,9 T<sub>m</sub>. Elimina la porosidad residual y sirve para superaleaciones y titanio.</li>
+     <li><b>MIM:</b> polvo fino mezclado con ligante, inyectado, desligado y sinterizado con 12 a 20 % de contracción. Piezas pequeñas complejas.</li>
+    </ul>
+    <h3>Densificación asistida por presión</h3>
+    <p>Con presión, el laboratorio combina el colapso plástico (Heckel con P<sub>y</sub> que baja con la temperatura) y la difusión acelerada por el esfuerzo aplicado, con factor (1 + P/P<sub>s</sub>)^0,6 sobre la cinética, donde P<sub>s</sub> = 6γ/d es la tensión de sinterizado.</p>
+   </article>
+   <article data-g="prop">
+    <h2>Propiedades y porosidad</h2>
+    <p class="lead">La porosidad p = 1 − D es la variable que más degrada las propiedades.</p>
+    <ul><li><b>Resistencia:</b> σ ≈ σ₀·exp(−5,5 p)·Q<sub>n</sub>, donde Q<sub>n</sub> = 1 − exp(−3X/a) mide la calidad de los cuellos.</li><li><b>Alargamiento:</b> cae todavía más rápido: A ≈ A₀·exp(−9 p)·Q<sub>n</sub>².</li><li><b>Módulo elástico:</b> E ≈ E₀(1 − p)^2,7.</li><li><b>Conductividad:</b> k ≈ k₀(1 − p)^1,5 con el factor de cuello.</li><li><b>Dureza y grano:</b> el grano fino endurece (Hall–Petch).</li></ul>
+    <p>Por encima de D ≈ 0,92 los poros se cierran y se puede aplicar HIP sin lata.</p>
+   </article>
+   <article data-g="fallas">
+    <h2>Fallas típicas y mejoras</h2>
+    <ul>
+     <li><b>Gradiente de densidad:</b> fricción o llenado desigual. Mejora: doble acción, lubricante, herramental multinivel, relación H/D menor.</li>
+     <li><b>Grietas de laminación:</b> recuperación elástica alta con poca resistencia en verde. Mejora: menos presión, expulsión lenta, polvo irregular.</li>
+     <li><b>Cuello débil:</b> temperatura o tiempo insuficientes, o atmósfera inadecuada. Mejora: más temperatura, polvo más fino, atmósfera reductora.</li>
+     <li><b>Distorsión o hundimiento:</b> temperatura cerca del solidus o demasiada fase líquida.</li>
+     <li><b>Crecimiento de grano:</b> sostenimiento largo. Mejora: ciclos cortos como SPS.</li>
+     <li><b>Gradiente térmico:</b> rampas rápidas en piezas grandes. Mejora: meseta de homogeneización.</li>
+     <li><b>Llenado corto y líneas de soldadura en MIM:</b> molde frío o caudal bajo.</li>
+     <li><b>Contaminación:</b> oxígeno en titanio, carbono o nitrógeno en inoxidables.</li>
+    </ul>
+   </article>
+   <article data-g="seg">
+    <h2>Seguridad con polvos</h2>
+    <ul><li>Los polvos metálicos finos (aluminio, titanio, magnesio) pueden ser explosivos y pirofóricos: evita nubes de polvo, chispas y humedad.</li><li>Usa respirador con filtro P3, guantes y ropa antiestática.</li><li>No uses agua en incendios de metales: se requiere extintor clase D.</li><li>Los hornos con hidrógeno exigen detección de fugas y purga con nitrógeno.</li><li>El ligante del MIM libera vapores: extracción obligatoria.</li></ul>
+   </article>
+   <article data-g="uso">
+    <h2>Cómo usar el laboratorio</h2>
+    <ol><li>Elige un ejemplo o construye el tuyo: proceso, geometría, material.</li><li>En <b>Polvos</b> define hasta tres fracciones y mira el empaquetamiento.</li><li>Ajusta presión, temperatura, tiempo y atmósfera en el panel izquierdo. Toca la <b>i</b> para ver qué significa cada variable.</li><li>Mueve el control de avance o pulsa Simular y cambia el campo mostrado: esfuerzo, densidad, temperatura, cuello, grano, dureza.</li><li>Haz clic sobre la pieza para ver los valores locales y la microestructura.</li><li>Lee el diagnóstico, compara curvas y agrega ensayos al informe.</li></ol>
+    <p><b>Aviso:</b> son modelos semiempíricos con constantes típicas de la literatura; deben calibrarse con tus polvos y tu equipo antes de usarse en diseño.</p>
+   </article>
+   <article data-g="refs">
+    <h2>Referencias y laboratorios afines</h2>
+    <p>Este laboratorio se basa en modelos clásicos y en recursos de simulación y enseñanza existentes.</p>
+    <ul>
+     <li>R. M. German, <i>Sintering Theory and Practice</i>, Wiley (1996).</li>
+     <li>R. W. Heckel, “Density–pressure relationships in powder compaction”, Trans. AIME 221 (1961).</li>
+     <li>F. de Larrard, <i>Concrete Mixture Proportioning</i> (1999): modelo de empaquetamiento lineal.</li>
+     <li>H. Su y D. L. Johnson, “Master sintering curve”, J. Am. Ceram. Soc. 79 (1996).</li>
+     <li>H. S. Helle, K. E. Easterling y M. F. Ashby, “Hot-isostatic pressing diagrams”, Acta Metall. 33 (1985).</li>
+     <li>S. H. Chung, Y.-S. Kwon, S. J. Park y R. M. German, “Modeling and Simulation of Press and Sinter Powder Metallurgy”, ASM Handbook, Vol. 7.</li>
+     <li>H. Staf, <i>Mechanical Modelling of Powder Compaction</i>, tesis doctoral, KTH (2020): compactación de carburo cementado y contracción diferencial.</li>
+     <li>A. D. Preston, <i>Understanding and utilization of thermal gradients in spark plasma sintering</i>, tesis, Colorado State University (2022).</li>
+     <li>M. Nižňanský et al., Open Ceramics 16 (2023) 100433: SPS de alta presión y simulación de temperatura en matriz.</li>
+     <li>R. Asthana, D. J. Bee y R. Rothaupt, experimento de sinterizado para estudiantes, ASEE (2004).</li>
+     <li>PMAI, curso virtual de metalurgia de polvos (PMSC 22) y Fraunhofer, “Computer simulation as a tool in PM” (2005).</li>
+    </ul>
+   </article>
+  </div>
+ </div>
+</section>
+
+<!-- ===================== LABORATORIO ===================== -->
+<section class="tab active" id="tab-lab" role="tabpanel">
+ <div class="procbar geo-gap" id="procbar" role="group" aria-label="Proceso"></div>
+ <div class="geobar" id="geobar" role="group" aria-label="Geometría de la pieza"></div>
+ <div class="lab-grid">
+  <aside class="panel inputs">
+   <div class="grp"><h3>Ejemplo de pieza <button class="i" data-info="ejemplo" aria-label="Información">i</button></h3><div class="chips" id="exChips"></div><p class="exdesc" id="exDesc"></p></div>
+   <div class="grp"><h3>Material <button class="i" data-info="material" aria-label="Información">i</button></h3><select class="big" id="matSel" aria-label="Material"></select><div class="matprops" id="matProps"></div></div>
+   <div class="grp"><h3>Geometría</h3><div id="inGeo"></div></div>
+   <div class="grp"><h3>Polvos y mezcla</h3><div id="inPow"></div></div>
+   <div class="grp"><h3 id="procTitle">Proceso</h3><div id="inProc"></div></div>
+   <div class="grp"><h3>Ciclo térmico</h3><div id="inTh"></div></div>
+   <details class="grp"><summary>Producción y costos</summary><div id="inCost"></div></details>
+  </aside>
+  <div>
+   <div class="panel stage">
+    <div class="hazard" aria-hidden="true"></div>
+    <div class="stage-head"><h2 id="stageTitle">Proceso</h2><span class="sub" id="stageSub"></span></div>
+    <canvas id="sim" aria-label="Simulación del proceso de polvos" style="height:420px;width:100%;display:block"></canvas>
+    <div class="cbar"><span id="cbA"></span><canvas id="cbar"></canvas><span id="cbB"></span><b id="cbN" style="margin-left:6px"></b></div>
+    <div class="stagebar" id="stagebar"></div>
+    <div class="hud" id="hud"></div>
+    <div class="ctrl">
+     <button class="play" id="playBtn">▶ Simular</button>
+     <input type="range" id="prog" min="0" max="1000" step="1" value="0" aria-label="Avance del proceso">
+     <span class="lbl" id="progLbl"></span>
+     <label class="speed">Velocidad <select id="spdSel"><option value="0.008">Rápida</option><option value="0.004" selected>Normal</option><option value="0.002">Lenta</option></select></label>
+     <button class="i" data-info="prog" aria-label="Información">i</button>
+    </div>
+    <div class="simtools"><label class="ck">Campo <select id="fldSel"></select></label><label class="ck"><input type="checkbox" id="vecSel" checked> Vectores (esfuerzo o calor)</label><button class="i" data-info="campo" aria-label="Información">i</button><button class="i" data-info="vect" aria-label="Información">i</button></div>
+    <div class="probe"><canvas id="micro" width="200" height="200" aria-label="Microestructura del punto elegido"></canvas><div><b style="font-size:.9rem">Punto inspeccionado <button class="i" data-info="sonda" aria-label="Información">i</button></b><p class="mini2" id="probeTxt">Haz clic sobre la pieza.</p><div class="pv" id="pv"></div></div></div>
+    <div class="verdict"><span class="badge ok" id="verdictBadge">Viable</span><span class="mini" id="verdictTxt"></span></div>
+   </div>
+   <div class="sec"><h3>Diagnóstico: fallas posibles y mejoras <button class="i" data-info="diag" aria-label="Información">i</button></h3><div class="diag" id="diag"></div></div>
+   <div class="sec"><h3>Resultados del cálculo</h3><div class="results" id="results"></div></div>
+   <div class="sec"><h3>Curvas de propiedades y del proceso</h3>
+    <div class="charts3">
+     <div class="chartbox"><h4>Compresibilidad <button class="i" data-info="g_heck" aria-label="Información">i</button></h4><canvas id="ch1"></canvas></div>
+     <div class="chartbox"><h4>Propiedades vs densidad <button class="i" data-info="g_prop" aria-label="Información">i</button></h4><canvas id="ch2"></canvas></div>
+     <div class="chartbox"><h4>Temperatura de sinterizado <button class="i" data-info="g_temp" aria-label="Información">i</button></h4><canvas id="ch3"></canvas></div>
+     <div class="chartbox"><h4>Tamaño del polvo <button class="i" data-info="g_size" aria-label="Información">i</button></h4><canvas id="ch4"></canvas></div>
+     <div class="chartbox"><h4>Perfil axial de densidad <button class="i" data-info="g_perf" aria-label="Información">i</button></h4><canvas id="ch5"></canvas></div>
+     <div class="chartbox"><h4>Ciclo térmico y densificación <button class="i" data-info="g_ciclo" aria-label="Información">i</button></h4><canvas id="ch6"></canvas></div>
+    </div>
+   </div>
+   <div class="sec"><h3>Costos por pieza <button class="i" data-info="cTot" aria-label="Información">i</button></h3>
+    <div class="costwrap"><div class="panel" style="padding:12px 14px"><div class="costbar" id="costBar"></div><div class="tblwrap"><table class="tbl" id="costTbl"></table></div></div>
+    <div class="panel" style="padding:12px 14px"><div class="tblwrap"><table class="tbl" id="costLot"></table></div></div></div>
+   </div>
+   <div class="actions"><button class="btn primary" id="saveRun">Agregar ensayo al informe</button><button class="btn" id="goRep">Ver informe</button><button class="btn" id="goGuide">Abrir la guía</button></div>
+  </div>
+ </div>
+</section>
+
+<!-- ===================== POLVOS ===================== -->
+<section class="tab" id="tab-pol" role="tabpanel">
+ <div class="panel" style="padding:14px 16px">
+  <h2 style="margin-bottom:6px">Diseño de la mezcla de polvos</h2>
+  <p style="color:var(--ink-2);margin-top:0">Combina hasta tres fracciones de tamaño y forma. La mezcla se usa en el laboratorio: cambia el empaquetamiento, la densidad en verde, la fluidez, el área superficial y la cinética de sinterizado.</p>
+  <div class="chips" id="blendPre" style="margin-bottom:8px"></div>
+  <div class="powgrid">
+   <div><div id="inPow2"></div><div class="rowbtn"><button class="btn sm" id="optBtn" type="button">Aplicar fracción fina óptima (fracciones 1 y 2)</button><button class="i" data-info="g_pack" aria-label="Información">i</button></div></div>
+   <div><div class="results" id="powRes"></div></div>
+  </div>
+ </div>
+ <div class="powgrid sec">
+  <div class="chartbox"><h4>Distribución de tamaños <button class="i" data-info="g_dist" aria-label="Información">i</button></h4><canvas id="dist" style="height:280px"></canvas></div>
+  <div class="chartbox"><h4>Empaquetamiento contra fracción fina <button class="i" data-info="g_pack" aria-label="Información">i</button></h4><canvas id="lpm" style="height:280px"></canvas></div>
+ </div>
+ <div class="powgrid sec">
+  <div class="chartbox"><h4>Vista 2D de la mezcla <span class="mini2" id="packTxt"></span></h4><canvas id="packv" style="height:230px"></canvas></div>
+  <div class="panel" style="padding:12px 16px"><h3 style="margin-top:0">Métodos de producción de polvo</h3><div class="tblwrap"><table class="tbl" id="methTbl"></table></div></div>
+ </div>
+ <div class="panel sec" style="padding:14px 16px"><h3 style="margin-top:0">Galería de morfologías</h3><div class="morph" id="morph"></div></div>
+</section>
+
+<!-- ===================== MATERIALES ===================== -->
+<section class="tab" id="tab-mat" role="tabpanel">
+ <div class="panel" style="padding:14px 16px">
+  <h2 style="margin-bottom:6px">Base de datos de materiales</h2>
+  <p style="color:var(--ink-2);margin-top:0">Propiedades del material denso y parámetros de compactación y sinterizado. Toca el nombre para ver sus datos en el laboratorio.</p>
+  <div class="tblwrap"><table class="tbl" id="matTable"></table></div>
+ </div>
+ <div class="matgrid sec">
+  <div class="chartbox"><h4>Compresibilidad de los materiales <button class="i" data-info="g_cm" aria-label="Información">i</button></h4><canvas id="cmH" style="height:300px"></canvas></div>
+  <div class="chartbox"><h4>Sinterabilidad de los materiales <button class="i" data-info="g_sint" aria-label="Información">i</button></h4><canvas id="cmS" style="height:300px"></canvas></div>
+ </div>
+ <div class="panel sec"><h3 style="padding:12px 16px 0">Agregar material propio</h3>
+  <form class="matform" id="matForm">
+   <label style="grid-column:1/-1">Nombre<input name="name" required value="Mi material"></label>
+   <label>Clase de atmósfera<select name="cls" style="border:1px solid var(--line);background:var(--surface-2);border-radius:4px;padding:6px"><option value="fer">Acero o hierro</option><option value="inox">Inoxidable</option><option value="cu">Cobre</option><option value="al">Aluminio</option><option value="ti">Titanio</option><option value="ni">Níquel</option><option value="ref">Refractario</option><option value="car">Carburo</option></select></label>
+   <label>ρ (kg/m³)<input name="rho" type="number" step="any" value="7800" required></label>
+   <label>T fusión (°C)<input name="Tm" type="number" step="any" value="1450" required></label>
+   <label>T sinterizado (°C)<input name="Ts" type="number" step="any" value="1150" required></label>
+   <label>Py de Heckel (MPa)<input name="Py" type="number" step="any" value="400" required></label>
+   <label>σu, tracción (MPa)<input name="UTS" type="number" step="any" value="500" required></label>
+   <label>HV<input name="HV" type="number" step="any" value="150" required></label>
+   <label>E (GPa)<input name="E" type="number" step="any" value="200" required></label>
+   <label>k (W/m·K)<input name="k" type="number" step="any" value="40" required></label>
+   <label>Q sinterizado (kJ/mol)<input name="Qs" type="number" step="any" value="250" required></label>
+   <label>Precio (COP/kg)<input name="price" type="number" step="any" value="15000" required></label>
+   <div style="grid-column:1/-1"><button class="btn primary" type="submit">Agregar a la base de datos</button></div>
+  </form>
+ </div>
+</section>
+
+<!-- ===================== INFORME ===================== -->
+<section class="tab" id="tab-rep" role="tabpanel">
+ <div class="rep-tools"><button class="btn primary" id="printBtn">Imprimir o guardar como PDF</button><button class="btn" id="refreshRep">Actualizar con la simulación actual</button><button class="btn" id="clearRuns">Borrar ensayos guardados</button></div>
+ <div class="report" id="report"></div>
+</section>
+</main>
+<dialog id="info" aria-labelledby="dlgTitle"><div class="dlg-head"><div><h3 id="dlgTitle"></h3><div class="sym" id="dlgSym"></div></div><button id="dlgClose" aria-label="Cerrar">✕</button></div><div class="dlg-body" id="dlgBody"></div></dialog>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+"use strict";
+/* ================= MATERIALES =================
+ rho kg/m3, Tm °C (solidus), Tl °C (formación de líquido, 0 = no), Ts sinterizado °C, Th prensado en caliente/SPS °C, Thip °C,
+ Py presión de fluencia de Heckel MPa, sy/UTS MPa, HV, E GPa, A %, k W/mK, cp J/kgK, se MS/m, Qs kJ/mol (activación efectiva de sinterizado),
+ act factor de actividad (óxidos), Kg constante de crecimiento de grano µm³/s, gam J/m2, Dmax densidad máx. en sinterizado libre, price COP/kg polvo */
+const MATS=[
+ {id:"fe",name:"Hierro puro (Fe)",cls:"fer",rho:7870,Tm:1538,Tl:0,Ts:1120,Th:1000,Thip:1150,Py:380,sy:150,UTS:300,HV:90,E:211,A:35,k:80,cp:450,se:10,Qs:250,act:1.0,Kg:4e11,gam:2.0,Dmax:0.96,price:9000,d:75,mo:"irr",atm:["n2h2","h2"]},
+ {id:"fc0208",name:"Acero Fe-2Cu-0,8C (FC-0208)",cls:"fer",rho:7700,Tm:1480,Tl:1083,Ts:1120,Th:1000,Thip:1150,Py:400,sy:400,UTS:650,HV:200,E:205,A:8,k:45,cp:460,se:4,Qs:250,act:1.2,Kg:4e11,gam:2.0,Dmax:0.95,price:12000,d:75,mo:"irr",atm:["n2h2","h2"]},
+ {id:"ss316",name:"Acero inoxidable 316L",cls:"inox",rho:7950,Tm:1450,Tl:0,Ts:1350,Th:1150,Thip:1150,Py:520,sy:200,UTS:550,HV:155,E:193,A:50,k:15,cp:500,se:1.35,Qs:270,act:0.8,Kg:3e9,gam:1.9,Dmax:0.985,price:100000,d:15,mo:"esf",atm:["h2","vac"]},
+ {id:"ss174",name:"Acero inoxidable 17-4PH",cls:"inox",rho:7780,Tm:1450,Tl:0,Ts:1330,Th:1100,Thip:1150,Py:540,sy:800,UTS:950,HV:300,E:197,A:6,k:18,cp:460,se:1.2,Qs:270,act:0.7,Kg:3e9,gam:1.9,Dmax:0.985,price:110000,d:15,mo:"esf",atm:["vac","h2"]},
+ {id:"cu",name:"Cobre electrolítico (Cu)",cls:"cu",rho:8960,Tm:1085,Tl:0,Ts:850,Th:800,Thip:850,Py:240,sy:70,UTS:220,HV:50,E:117,A:45,k:390,cp:385,se:58,Qs:197,act:1.0,Kg:4e11,gam:1.7,Dmax:0.97,price:50000,d:45,mo:"den",atm:["n2h2","h2"]},
+ {id:"bronce",name:"Bronce Cu-10Sn (cojinetes)",cls:"cu",rho:8800,Tm:900,Tl:798,Ts:800,Th:750,Thip:780,Py:260,sy:150,UTS:300,HV:75,E:100,A:15,k:50,cp:380,se:7,Qs:200,act:0.6,Kg:4e11,gam:1.5,Dmax:0.90,price:60000,d:45,mo:"irr",atm:["n2h2","h2"]},
+ {id:"al",name:"Aluminio puro (Al 99,7)",cls:"al",rho:2700,Tm:660,Tl:0,Ts:620,Th:550,Thip:500,Py:140,sy:30,UTS:90,HV:25,E:69,A:40,k:237,cp:900,se:37,Qs:130,act:0.02,Kg:2.7e9,gam:1.0,Dmax:0.95,price:32000,d:30,mo:"irr",atm:["n2","vac"]},
+ {id:"alcu",name:"Aluminio Al-4,5Cu (fase líquida)",cls:"al",rho:2790,Tm:640,Tl:548,Ts:600,Th:540,Thip:520,Py:150,sy:200,UTS:300,HV:90,E:72,A:8,k:150,cp:880,se:20,Qs:135,act:0.05,Kg:2.7e9,gam:1.0,Dmax:0.985,price:60000,d:30,mo:"irr",atm:["n2","vac"],lps:true},
+ {id:"alcusic",name:"Compuesto Al-4,5Cu / 10 % SiC",cls:"al",rho:2870,Tm:640,Tl:548,Ts:600,Th:560,Thip:520,Py:220,sy:260,UTS:340,HV:120,E:85,A:3,k:130,cp:860,se:15,Qs:140,act:0.04,Kg:2.7e9,gam:1.0,Dmax:0.95,price:100000,d:25,mo:"irr",atm:["n2","vac"],lps:true,comp:true},
+ {id:"ti64",name:"Titanio Ti-6Al-4V",cls:"ti",rho:4430,Tm:1650,Tl:0,Ts:1250,Th:1000,Thip:920,Py:600,sy:880,UTS:950,HV:330,E:114,A:14,k:6.7,cp:526,se:0.58,Qs:205,act:0.7,Kg:8e9,gam:1.6,Dmax:0.97,price:800000,d:45,mo:"esf",atm:["vac","ar"]},
+ {id:"in718",name:"Superaleación Inconel 718",cls:"ni",rho:8190,Tm:1336,Tl:0,Ts:1240,Th:1150,Thip:1160,Py:600,sy:1030,UTS:1240,HV:380,E:200,A:12,k:11,cp:435,se:0.8,Qs:300,act:0.4,Kg:7e11,gam:1.9,Dmax:0.98,price:240000,d:30,mo:"esf",atm:["vac","h2"]},
+ {id:"w",name:"Tungsteno (W)",cls:"ref",rho:19250,Tm:3422,Tl:0,Ts:2200,Th:1800,Thip:1700,Py:800,sy:550,UTS:750,HV:350,E:411,A:2,k:173,cp:132,se:18,Qs:420,act:1.0,Kg:1e8,gam:2.8,Dmax:0.97,price:200000,d:3,mo:"irr",atm:["h2","vac"]},
+ {id:"mo",name:"Molibdeno (Mo)",cls:"ref",rho:10200,Tm:2623,Tl:0,Ts:1900,Th:1600,Thip:1500,Py:700,sy:400,UTS:600,HV:230,E:330,A:25,k:138,cp:250,se:19,Qs:400,act:1.0,Kg:5e10,gam:2.2,Dmax:0.97,price:150000,d:5,mo:"irr",atm:["h2","vac"]},
+ {id:"wcco",name:"Carburo cementado WC-10Co",cls:"car",rho:14500,Tm:2870,Tl:1320,Ts:1400,Th:1350,Thip:1350,Py:400,sy:2000,UTS:2500,HV:1400,E:560,A:0.5,k:90,cp:220,se:6,Qs:380,act:5,Kg:2.6e9,gam:1.5,Dmax:0.999,price:320000,d:80,mo:"gra",atm:["vac","h2"],lps:true}
+];
+const matById=id=>MATS.find(m=>m.id===id)||MATS[0];
+const ATMS=[["aire","Aire"],["n2","Nitrógeno (N₂)"],["n2h2","N₂ + 10 % H₂"],["h2","Hidrógeno seco (H₂)"],["vac","Vacío"],["ar","Argón de alta pureza"]];
+const ATMF={fer:{aire:0.05,n2:0.5,n2h2:1,h2:1.1,vac:0.9,ar:0.4},inox:{aire:0.02,n2:0.2,n2h2:0.7,h2:1,vac:1,ar:0.5},cu:{aire:0.1,n2:0.5,n2h2:1,h2:1.1,vac:0.8,ar:0.6},al:{aire:0.01,n2:1,n2h2:0.6,h2:0.3,vac:0.8,ar:0.7},ti:{aire:0.01,n2:0.05,n2h2:0.05,h2:0.2,vac:1,ar:0.9},ni:{aire:0.02,n2:0.3,n2h2:0.6,h2:0.9,vac:1,ar:0.8},ref:{aire:0.02,n2:0.4,n2h2:0.8,h2:1,vac:0.9,ar:0.7},car:{aire:0.05,n2:0.3,n2h2:0.6,h2:0.9,vac:1,ar:0.9}};
+const ATMW={fer:{aire:"El hierro se oxida en aire a alta temperatura: no hay sinterizado útil.",n2:"N₂ puro no reduce los óxidos: cuellos débiles. Usa N₂ con H₂."},inox:{aire:"El Cr forma óxido estable en aire: no sinteriza.",n2:"N₂ forma nitruros de cromo y fragiliza el inoxidable.",n2h2:"El óxido de cromo solo se reduce con H₂ muy seco o con vacío."},cu:{aire:"El cobre se oxida en aire: usa atmósfera reductora."},al:{aire:"La película de alúmina bloquea el sinterizado.",h2:"El H₂ no reduce la alúmina y puede porosizar.",n2h2:"Para aluminio se prefiere N₂ puro (el Mg de la aleación ayuda a romper la capa de óxido)."},ti:{aire:"El titanio se oxida y se fragiliza con oxígeno.",n2:"El N₂ forma TiN frágil: usa vacío o argón.",n2h2:"El N₂ y el H₂ fragilizan el titanio.",h2:"El H₂ forma hidruros y fragiliza el titanio."},ni:{aire:"La superaleación se oxida en aire."},ref:{aire:"El W y el Mo se oxidan (y volatilizan) en aire."},car:{aire:"El WC se descarbura y oxida en aire.",n2:"El N₂ altera el balance de carbono del WC-Co."}};
+/* ================= MORFOLOGÍAS =================
+ bl/bt empaquetamiento suelto y con golpeteo (monotamaño), d0 tamaño de cohesión µm, psi esfericidad, B reacomodo de Heckel, gs factor de resistencia en verde, mact actividad de sinterizado, prim fracción del tamaño primario */
+const MORPH={
+ esf:{n:"Esférica (atomización con gas)",bl:0.58,bt:0.70,d0:1.2,psi:0.95,B:0.05,gs:0.10,mact:0.9,prim:1,cost:1.6,src:"Atomización con gas inerte",fl:0.85},
+ red:{n:"Redondeada (atomización con agua, recocida)",bl:0.42,bt:0.55,d0:3,psi:0.85,B:0.08,gs:0.5,mact:1.0,prim:1,cost:1.1,src:"Atomización con agua y recocido",fl:0.95},
+ irr:{n:"Irregular (atomización con agua)",bl:0.36,bt:0.48,d0:3,psi:0.72,B:0.12,gs:0.8,mact:1.15,prim:1,cost:1.0,src:"Atomización con agua a alta presión",fl:1.0},
+ esp:{n:"Esponjosa (reducción de óxidos)",bl:0.30,bt:0.42,d0:3.5,psi:0.55,B:0.18,gs:1.0,mact:1.3,prim:1,cost:0.8,src:"Reducción de óxidos o sales",fl:1.15},
+ den:{n:"Dendrítica (electrolítica)",bl:0.24,bt:0.36,d0:4,psi:0.45,B:0.20,gs:1.2,mact:1.3,prim:1,cost:1.1,src:"Electrólisis de sales",fl:1.3},
+ esc:{n:"Escamas (molienda de alta energía)",bl:0.16,bt:0.26,d0:6,psi:0.30,B:0.10,gs:1.1,mact:1.5,prim:1,cost:1.3,src:"Molienda mecánica",fl:1.6},
+ gra:{n:"Granulada (secado por aspersión)",bl:0.30,bt:0.40,d0:1,psi:0.90,B:0.20,gs:0.6,mact:1.0,prim:0.03,cost:1.4,src:"Secado por aspersión de polvo fino con ligante",fl:0.8}
+};
+const MO=Object.entries(MORPH).map(([k,m])=>[k,m.n]);
+const BINDERS={cera:{n:"Cera + poliolefina (solvente y térmico)",Db:0.35,rate:2.0,cost:1.0,visc:1.0},pom:{n:"POM (desligado catalítico)",Db:1.2,rate:6.0,cost:1.3,visc:0.8},peg:{n:"PEG + PMMA (agua y térmico)",Db:0.6,rate:3.0,cost:1.1,visc:0.9}};
+/* ================= PROCESOS Y GEOMETRÍAS ================= */
+const PROCS={
+ prensa:{name:"Prensado y sinterizado",short:"Prensado + sinterizado",sub:"Matriz rígida en frío y horno",P:{min:100,max:1000,step:10},pk:["P","act","multi"],
+  icon:'<svg viewBox="0 0 60 30"><rect x="6" y="3" width="14" height="10" fill="currentColor"/><rect x="40" y="3" width="14" height="10" fill="currentColor"/><rect x="22" y="1" width="16" height="12" fill="currentColor" opacity=".55"/><rect x="6" y="15" width="48" height="10" fill="currentColor" opacity=".35"/><rect x="22" y="20" width="16" height="9" fill="#C8642B"/></svg>'},
+ cip:{name:"Prensado isostático en frío (CIP)",short:"Isostático en frío",sub:"Molde elastomérico y presión de fluido",P:{min:50,max:500,step:10},pk:["P"],
+  icon:'<svg viewBox="0 0 60 30"><rect x="14" y="5" width="32" height="20" rx="7" fill="currentColor" opacity=".35" stroke="currentColor" stroke-width="2"/><path d="M4 15h7M49 15h7M30 0v4M30 26v4" stroke="#C8642B" stroke-width="2.5"/></svg>'},
+ hp:{name:"Prensado en caliente",short:"Prensado en caliente",sub:"Matriz de grafito, presión y temperatura",P:{min:5,max:100,step:1},pk:["P","act"],
+  icon:'<svg viewBox="0 0 60 30"><rect x="8" y="2" width="12" height="26" fill="currentColor" opacity=".7"/><rect x="40" y="2" width="12" height="26" fill="currentColor" opacity=".7"/><rect x="21" y="9" width="18" height="12" fill="#C8642B"/><path d="M2 8q2-3 4 0t4 0M50 8q2-3 4 0t4 0" stroke="#E7B34C" stroke-width="1.5" fill="none"/></svg>'},
+ sps:{name:"Sinterización por plasma de chispa (SPS)",short:"SPS / FAST",sub:"Corriente pulsada y presión",P:{min:10,max:100,step:1},pk:["P","fld"],
+  icon:'<svg viewBox="0 0 60 30"><rect x="10" y="1" width="40" height="5" fill="currentColor"/><rect x="10" y="24" width="40" height="5" fill="currentColor"/><rect x="18" y="7" width="24" height="16" fill="#C8642B" opacity=".85"/><path d="M32 8l-6 8h5l-3 7 8-10h-5z" fill="#FFE07A"/></svg>'},
+ hip:{name:"Prensado isostático en caliente (HIP)",short:"HIP",sub:"Gas a alta presión y temperatura",P:{min:50,max:250,step:5},pk:["P","hstate"],
+  icon:'<svg viewBox="0 0 60 30"><ellipse cx="30" cy="15" rx="26" ry="13" fill="none" stroke="currentColor" stroke-width="2.5"/><rect x="20" y="8" width="20" height="14" rx="4" fill="#C8642B"/><path d="M8 15h7M45 15h7M30 3v3M30 24v3" stroke="#5FB3C6" stroke-width="2"/></svg>'},
+ mim:{name:"Moldeo por inyección de metal (MIM)",short:"MIM",sub:"Materia prima con ligante, desligado y sinterizado",P:{min:0,max:0,step:1},pk:["load","binder","Tinj","Tmold","vinj","gate"],
+  icon:'<svg viewBox="0 0 60 30"><rect x="14" y="4" width="32" height="22" fill="currentColor" opacity=".35"/><rect x="22" y="9" width="16" height="12" fill="#C8642B"/><path d="M2 15h12" stroke="currentColor" stroke-width="4"/></svg>'}
+};
+const GEOS={
+ pastilla:{name:"Pastilla",in:["D","H"],ax:true,def:{D:20,H:10},svg:'<rect x="10" y="10" width="36" height="14" rx="1" fill="currentColor"/>'},
+ barra:{name:"Barra esbelta",in:["D","H"],ax:true,def:{D:12,H:36},svg:'<rect x="19" y="2" width="18" height="30" rx="1" fill="currentColor"/>'},
+ buje:{name:"Buje",in:["D","Di","H"],ax:true,def:{D:22,Di:12,H:16},svg:'<rect x="10" y="6" width="12" height="22" fill="currentColor"/><rect x="34" y="6" width="12" height="22" fill="currentColor"/>'},
+ brida:{name:"Buje con brida",in:["D1","H1","D2","H2","Di","tsel"],ax:true,def:{D1:28,H1:5,D2:16,H2:12,Di:8},svg:'<path d="M6 32V24h10V6h6v18h12V6h6v18h10v8z" fill="currentColor" opacity="0"/><path d="M4 26h48v6H4zM14 6h10v20H14zM32 6h10v20H32z" fill="currentColor"/>'},
+ cubo:{name:"Piñón con cubo",in:["D1","H1","D2","H2","Di"],ax:true,def:{D1:32,H1:6,D2:14,H2:8,Di:6},svg:'<path d="M4 18h6l2-4h4l2 4h4l2-4h4l2 4h4l2-4h4l2 4h6v6H4z" fill="currentColor"/><rect x="20" y="6" width="16" height="12" fill="currentColor"/>'},
+ cono:{name:"Cono truncado",in:["Db","Dt","H"],ax:true,def:{Db:24,Dt:12,H:14},svg:'<path d="M8 30h40L38 4H18z" fill="currentColor"/>'},
+ placa:{name:"Placa rectangular",in:["Wp","Ly","H"],ax:false,def:{Wp:30,Ly:40,H:8},svg:'<rect x="4" y="11" width="48" height="13" rx="1" fill="currentColor"/>'},
+ copa:{name:"Copa (crisol)",in:["D","Di","tb","H"],ax:true,def:{D:24,Di:16,tb:4,H:18},svg:'<path d="M8 4h9v18h22V4h9v26H8z" fill="currentColor"/>'}
+};
+GEOS.brida.in=["D1","H1","D2","H2","Di"];
+</script>
+<script>
+"use strict";
+const V={
+ proceso:{n:"Proceso de consolidación",d:"Ruta con que el polvo se convierte en pieza sólida: prensado en matriz y sinterizado, isostático en frío (CIP), prensado en caliente, SPS, HIP o moldeo por inyección (MIM).",p:"Define qué fuerzas actúan (uniaxiales o isostáticas), si hay fricción con la matriz, cuánto dura el ciclo y qué modelos gobiernan la densificación.",q:"Determina la densidad, la homogeneidad, la precisión dimensional y el costo de la pieza."},
+ geo:{n:"Geometría de la pieza",d:"Sección axial de la pieza (en las axisimétricas) o sección transversal (en la placa).",p:"Fija la altura de llenado, la esbeltez, los escalones y los cambios de sección que crean gradientes de presión, de temperatura y de flujo.",q:"Piezas con escalones, agujeros o paredes delgadas son más difíciles de densificar de forma uniforme."},
+ material:{n:"Material",d:"Aleación del polvo. Cada material aporta su dureza de fluencia de Heckel, su temperatura de fusión, sus propiedades térmicas y su cinética de sinterizado.",p:"Controla cuánta presión se necesita para compactar, a qué temperatura sinteriza, cuánto se densifica y qué atmósfera admite.",q:"Define la resistencia, la dureza, la conductividad y el costo de la pieza."},
+ ejemplo:{n:"Ejemplos de pieza",d:"Casos industriales precargados con material, polvos, proceso y parámetros razonables.",p:"Úsalos como punto de partida y cambia una variable a la vez para ver su efecto.",q:"Cada ejemplo corresponde a un producto reconocible: cojinetes, engranajes, implantes, herramientas de corte."},
+ D:{n:"Diámetro",s:"D",u:"mm",d:"Diámetro exterior de la pieza.",p:"Aumenta el área de prensado, la fuerza necesaria y el diámetro hidráulico, que reduce el efecto de la fricción con la pared.",q:"Tamaño de la pieza."},
+ H:{n:"Altura",s:"H",u:"mm",d:"Altura total de la pieza en la dirección de prensado.",p:"Mayor relación H/D significa más fricción acumulada contra la pared y mayor gradiente de densidad. En matriz se recomienda H/D menor de 1 con acción simple.",q:"Piezas altas quedan menos densas en el extremo lejano al punzón."},
+ Di:{n:"Diámetro del agujero",s:"Dᵢ",u:"mm",d:"Diámetro del agujero central o de la cavidad (0 si es macizo). Se forma con una varilla de núcleo.",p:"Agrega fricción contra el núcleo y reduce el diámetro hidráulico (D − Dᵢ), por lo que la pared trabaja como una pieza delgada.",q:"Paredes delgadas se densifican con menos uniformidad."},
+ D1:{n:"Diámetro de la base o brida",s:"D₁",u:"mm",d:"Diámetro del escalón inferior (brida o disco del engranaje).",p:"Define el área de la sección más ancha y la altura de llenado de ese nivel.",q:""},
+ H1:{n:"Altura de la base",s:"H₁",u:"mm",d:"Altura del escalón inferior.",p:"Una base delgada frente al cubo aumenta la diferencia de llenado entre niveles.",q:""},
+ D2:{n:"Diámetro del cubo",s:"D₂",u:"mm",d:"Diámetro del escalón superior (cubo o cuerpo).",p:"",q:""},
+ H2:{n:"Altura del cubo",s:"H₂",u:"mm",d:"Altura del escalón superior.",p:"Con un punzón simple, la zona más alta recibe menos compresión por unidad de altura y queda menos densa.",q:""},
+ Db:{n:"Diámetro mayor del cono",s:"D_b",u:"mm",d:"Diámetro en la base del cono truncado.",p:"",q:""},
+ Dt:{n:"Diámetro menor del cono",s:"D_t",u:"mm",d:"Diámetro en la cara superior del cono.",p:"Las paredes inclinadas no reciben presión directa: la presión se transmite lateralmente.",q:"El extremo delgado suele quedar menos denso."},
+ Wp:{n:"Ancho de la placa",s:"W",u:"mm",d:"Ancho de la sección de la placa rectangular.",p:"",q:""},
+ Ly:{n:"Longitud de la placa",s:"L_y",u:"mm",d:"Longitud perpendicular a la sección (dirección no mostrada).",p:"Junto con el ancho define el diámetro hidráulico de la sección para la fricción.",q:""},
+ tb:{n:"Espesor del fondo de la copa",s:"t_b",u:"mm",d:"Espesor del fondo cerrado de la copa.",p:"Las copas no se pueden prensar en matriz rígida porque la cavidad es ciega; se hacen por CIP, MIM o HIP.",q:""},
+ d1:{n:"Tamaño de la fracción 1",s:"d₁",u:"µm",d:"Mediana del tamaño de partícula de la fracción más gruesa de la mezcla.",p:"Los polvos gruesos fluyen y compactan bien, pero sinterizan lento porque tienen poca superficie.",q:"Define el tamaño de poro y de grano finales."},
+ y1:{n:"Proporción de la fracción 1",s:"y₁",u:"% vol",d:"Porcentaje en volumen de la fracción 1 dentro de la mezcla.",p:"Las proporciones se normalizan a 100 %.",q:""},
+ m1:{n:"Morfología de la fracción 1",d:"Forma del polvo, determinada por su método de producción: esférica, redondeada, irregular, esponjosa, dendrítica, en escamas o granulada.",p:"Controla el empaquetamiento, la fluidez, la resistencia en verde, la compresibilidad y la actividad de sinterizado.",q:"Los polvos esféricos dan mejor densidad pero piezas verdes frágiles; los irregulares se traban y son más resistentes en verde."},
+ d2:{n:"Tamaño de la fracción 2",s:"d₂",u:"µm",d:"Mediana de la fracción intermedia o fina.",p:"Un tamaño de 5 a 10 veces menor que la fracción 1 permite que las partículas finas rellenen los huecos de las gruesas.",q:"Aumenta la densidad de empaquetamiento y la de la pieza en verde."},
+ y2:{n:"Proporción de la fracción 2",s:"y₂",u:"% vol",d:"Porcentaje en volumen de la fracción 2.",p:"En mezclas binarias el óptimo suele estar entre 20 y 35 % de finos.",q:""},
+ m2:{n:"Morfología de la fracción 2",d:"Forma de las partículas de la fracción 2.",p:"",q:""},
+ d3:{n:"Tamaño de la fracción 3",s:"d₃",u:"µm",d:"Mediana de la fracción más fina.",p:"En mezclas trimodales llena los huecos que dejan las dos fracciones anteriores.",q:"Aumenta la actividad de sinterizado, pero también la cohesión y la mala fluidez."},
+ y3:{n:"Proporción de la fracción 3",s:"y₃",u:"% vol",d:"Porcentaje en volumen de la fracción 3.",p:"",q:""},
+ m3:{n:"Morfología de la fracción 3",d:"Forma de las partículas de la fracción 3.",p:"",q:""},
+ sg:{n:"Dispersión de cada fracción",s:"σg",u:"",d:"Desviación estándar geométrica de la distribución lognormal de cada fracción. 1,2 es muy estrecha y 2 es ancha.",p:"Distribuciones anchas se comportan como mezclas continuas y se empaquetan mejor, pero fluyen peor.",q:""},
+ lub:{n:"Lubricante",s:"lub",u:"% masa",d:"Cera o estearato que se mezcla con el polvo para reducir la fricción con la matriz.",p:"Reduce el coeficiente de fricción de 0,35 a menos de 0,1 y baja la fuerza de expulsión; un exceso disminuye la densidad y deja porosidad al quemarse.",q:"Menos gradiente de densidad y menos grietas en la expulsión."},
+ P:{n:"Presión de compactación",s:"P",u:"MPa",d:"Presión aplicada. En prensado en matriz es la presión sobre el punzón; en CIP, la del fluido; en prensado en caliente, SPS y HIP, la presión mantenida durante el ciclo térmico.",p:"En frío la densidad crece con la presión según Heckel: ln(1/(1−D)) = K·P + A. A alta temperatura la presión necesaria cae porque el metal se ablanda.",q:"Más presión da más densidad en verde, mayor resistencia y menos contracción posterior, con más desgaste del herramental.",e:"ln(1/(1−D)) = P/Py + A"},
+ act:{n:"Acción del prensado",d:"Simple: solo se mueve el punzón superior. Doble: se mueven ambos punzones. Matriz flotante: la matriz se desplaza libremente y equilibra la fricción.",p:"En acción simple la presión decae con la profundidad por la fricción con la pared (Janssen). Con doble acción el punto de menor presión queda en el centro.",q:"La doble acción o la matriz flotante reducen el gradiente de densidad y permiten piezas más altas.",e:"P(z) = P₀·exp(−4μK_r·z/D)"},
+ multi:{n:"Herramental multinivel",d:"Punzones independientes para cada escalón de la pieza, con llenado y recorrido ajustados a cada nivel.",p:"Sin él, todas las columnas de polvo reciben el mismo recorrido y las secciones delgadas se compactan de más y las gruesas de menos.",q:"Con multinivel la densidad es uniforme entre escalones."},
+ T:{n:"Temperatura",s:"T",u:"°C",d:"Temperatura de sinterizado o de consolidación mantenida durante el ciclo.",p:"La difusión crece exponencialmente con la temperatura (Arrhenius). Cerca del punto de fusión aparece crecimiento de grano y riesgo de deformación por peso propio.",q:"Define el cuello entre partículas, la densidad final, el tamaño de grano y la resistencia.",e:"D_dif ∝ exp(−Q/RT)"},
+ t:{n:"Tiempo de sostenimiento",s:"t",u:"min",d:"Tiempo que se mantiene la temperatura máxima.",p:"La densificación sigue la integral de la difusión en el tiempo; a partir de cierto punto el avance se frena y solo crece el grano.",q:"Más tiempo mejora la resistencia hasta que el grano crecido la reduce."},
+ hr:{n:"Velocidad de calentamiento",s:"β",u:"K/min",d:"Rapidez con que sube la temperatura de control.",p:"Velocidades altas generan gradientes térmicos entre el centro y la superficie, sobre todo en piezas grandes o poco conductoras. En SPS pueden ser de 100 a 600 K/min.",q:"Gradientes térmicos producen gradientes de densidad y de grano."},
+ atm:{n:"Atmósfera",d:"Gas o vacío en el horno.",p:"Debe reducir o evitar los óxidos superficiales que bloquean la difusión, sin formar compuestos frágiles: el N₂ fragiliza el titanio, el H₂ lo hidrura, el aire oxida casi todo.",q:"Una atmósfera inadecuada da cuellos débiles, oxidación o contaminación."},
+ fld:{n:"Efecto de campo eléctrico",d:"Considera que la corriente pulsada activa la difusión más allá del efecto térmico (por ejemplo limpiando óxidos con descargas).",p:"Reduce en el modelo la energía de activación en un 6 %. Es un efecto todavía discutido en la literatura.",q:"Densificación algo más rápida a igual temperatura."},
+ hstate:{n:"Estado inicial en HIP",d:"Polvo encapsulado (lata sellada al vacío) o pieza presinterizada con porosidad cerrada.",p:"Solo se puede aplicar HIP sin lata si la porosidad ya está cerrada (densidad relativa mayor de 0,92); con poros abiertos el gas penetra y no densifica.",q:"La lata permite piezas casi de forma final a partir de polvo."},
+ load:{n:"Carga de sólidos",s:"Φ",u:"% vol",d:"Fracción en volumen de polvo metálico en la materia prima; el resto es ligante.",p:"Debe quedar unos puntos por debajo de la carga crítica (empaquetamiento del polvo). Mayor carga significa menos contracción y menos ligante que remover, pero mayor viscosidad.",q:"Determina la contracción de sinterizado: L_f/L₀ = (Φ/D_f)^(1/3)."},
+ binder:{n:"Sistema de ligante",d:"Cera y poliolefina, POM (desligado catalítico) o PEG y PMMA soluble en agua.",p:"Cambia la velocidad de desligado, la viscosidad de inyección y el riesgo de defectos por gases del ligante.",q:""},
+ Tinj:{n:"Temperatura de inyección",s:"T_inj",u:"°C",d:"Temperatura del fundido de materia prima al entrar al molde.",p:"Más temperatura reduce la viscosidad y permite llenar secciones delgadas, pero degrada el ligante y aumenta la segregación.",q:""},
+ Tmold:{n:"Temperatura del molde",s:"T_m",u:"°C",d:"Temperatura de las paredes del molde.",p:"Un molde frío congela el frente antes de llenar secciones delgadas (llenado corto).",q:""},
+ vinj:{n:"Caudal de inyección",s:"Q",u:"cm³/s",d:"Volumen de materia prima que entra por segundo.",p:"Un caudal alto llena antes del congelamiento, pero puede causar chorro libre y líneas de soldadura.",q:""},
+ gate:{n:"Ubicación de la entrada",d:"Punto por donde entra la materia prima: centro superior, borde o base.",p:"Define el recorrido del frente, las líneas de soldadura y los últimos puntos en llenarse.",q:""},
+ lote:{n:"Tamaño del lote",s:"N",u:"piezas",d:"Piezas fabricadas con el mismo herramental.",p:"",q:"Reparte el costo del herramental entre todas las piezas."},
+ herr:{n:"Costo del herramental",s:"C_herr",u:"COP",d:"Matriz y punzones, molde, lata de HIP o matrices de grafito.",p:"",q:"Domina el costo en lotes pequeños."},
+ tEq:{n:"Tarifa del equipo de consolidación",s:"C_eq",u:"COP/h",d:"Costo horario de la prensa, de la prensa isostática, de la HIP, del SPS o de la inyectora.",p:"",q:""},
+ tHorno:{n:"Tarifa del horno",s:"C_horno",u:"COP/h",d:"Costo horario del horno de sinterizado (incluye atmósfera).",p:"",q:""},
+ tMO:{n:"Tarifa de mano de obra",s:"C_MO",u:"COP/h",d:"Costo horario del operario.",p:"",q:""},
+ pE:{n:"Precio de la energía",s:"C_E",u:"COP/kWh",d:"Tarifa eléctrica industrial.",p:"",q:""},
+ // salidas: polvos
+ dapp:{n:"Densidad aparente",s:"ρ_ap",u:"% ρ_th",d:"Densidad del polvo suelto, como cae en la matriz (empaquetamiento aleatorio suelto).",p:"Fija la altura de llenado: la relación de compresión es CR = D_verde/D_aparente.",q:""},
+ dtap:{n:"Densidad con golpeteo",s:"ρ_tap",u:"% ρ_th",d:"Densidad del polvo tras vibrarlo hasta el máximo empaquetamiento.",p:"Es el punto de partida de HIP y la referencia de la carga crítica en MIM.",q:""},
+ haus:{n:"Relación de Hausner",s:"HR",u:"",d:"Cociente entre la densidad con golpeteo y la aparente.",p:"Menor de 1,25 fluye bien; mayor de 1,4 fluye mal y cuesta llenar la matriz de forma repetible.",q:"",e:"HR = ρ_tap/ρ_ap"},
+ hall:{n:"Tiempo de flujo Hall",s:"t_H",u:"s/50 g",d:"Tiempo que tardan 50 g de polvo en fluir por el embudo de Hall normalizado.",p:"Determina la velocidad de llenado de la matriz; polvos finos o muy irregulares no fluyen.",q:""},
+ d32:{n:"Diámetro de Sauter",s:"d₃₂",u:"µm",d:"Diámetro medio que conserva la relación entre volumen y área superficial de la mezcla.",p:"Controla el área superficial disponible para sinterizar.",q:"",e:"d₃₂ = 1/Σ(yᵢ/dᵢ)"},
+ d50:{n:"Mediana de la mezcla",s:"d₅₀",u:"µm",d:"Tamaño bajo el cual está el 50 % del volumen de la mezcla completa.",p:"",q:""},
+ sv:{n:"Área superficial específica",s:"S_m",u:"m²/g",d:"Área de superficie por gramo de polvo.",p:"Es la fuerza impulsora del sinterizado: la energía superficial se reduce al formar cuellos.",q:"",e:"S = 6/(ψ·ρ·d₃₂)"},
+ phi:{n:"Empaquetamiento de la mezcla",s:"φ",u:"% ρ_th",d:"Fracción de volumen ocupada por sólido en la mezcla con golpeteo, según el modelo de empaquetamiento lineal de De Larrard.",p:"Una mezcla bien diseñada llena los huecos: con un cociente de tamaños de 7 o más se puede pasar de 64 % a 80 %.",q:"Mayor empaquetamiento significa más densidad en verde y menos contracción."},
+ // salidas: compactación
+ Dg:{n:"Densidad en verde",s:"D_g",u:"% ρ_th",d:"Densidad relativa promedio de la pieza después del prensado.",p:"Se calcula con la ecuación de Heckel a partir del empaquetamiento inicial y la presión, con las pérdidas por fricción.",q:"Es el punto de partida del sinterizado: menor densidad verde implica más contracción.",e:"D = 1 − exp(−(P/Py + A))"},
+ Dgrad:{n:"Gradiente de densidad",s:"ΔD",u:"pp",d:"Diferencia entre la densidad más alta y la más baja de la pieza (en puntos porcentuales).",p:"Nace de la fricción con la pared y de las diferencias de llenado entre secciones.",q:"Produce contracción despareja, alabeo y defectos: se recomienda menos de 3 puntos.",e:"ΔD = D_máx − D_mín"},
+ ftn:{n:"Fuerza de prensado",s:"F",u:"t",d:"Fuerza que debe hacer la prensa, en toneladas fuerza.",p:"Es el producto de la presión por el área proyectada; se elige una prensa con al menos 25 % de margen.",q:"",e:"F = P·A"},
+ prensaRec:{n:"Prensa recomendada",s:"",u:"t",d:"Capacidad estándar inmediatamente superior a la fuerza con 25 % de margen.",p:"",q:""},
+ fe:{n:"Fuerza de expulsión",s:"F_e",u:"kN",d:"Fuerza para empujar la pieza fuera de la matriz.",p:"Depende de la presión lateral residual, de la fricción y del área de contacto.",q:"Fuerzas altas dañan la pieza y desgastan la matriz.",e:"F_e ≈ μ·K_r·P·A_lat"},
+ sb:{n:"Recuperación elástica",s:"ε_sb",u:"%",d:"Expansión de la pieza al salir de la matriz porque se libera la energía elástica almacenada.",p:"Crece con la presión y baja con el módulo elástico y la densidad.",q:"Recuperaciones altas con baja resistencia en verde producen grietas de laminación.",e:"ε_sb ≈ 0,35·P/E_verde"},
+ sgr:{n:"Resistencia en verde",s:"σ_g",u:"MPa",d:"Resistencia a la flexión de la pieza sin sinterizar.",p:"Nace del entrelazado mecánico y la soldadura en frío entre partículas: los polvos irregulares son mucho más resistentes que los esféricos.",q:"Debe soportar la expulsión y el manejo hasta el horno.",e:"σ_g ∝ ((D − 0,55)/0,45)²"},
+ cr:{n:"Relación de compresión",s:"CR",u:"",d:"Altura de llenado dividida por la altura de la pieza prensada.",p:"Define el recorrido de los punzones y la profundidad de la cavidad de llenado.",q:"",e:"CR = D_verde/D_aparente"},
+ // salidas: térmicas y propiedades
+ dT:{n:"Gradiente térmico máximo",s:"ΔT",u:"K",d:"Máxima diferencia de temperatura entre el centro y la superficie durante el ciclo.",p:"Crece con la velocidad de calentamiento, el tamaño de la pieza y la baja conductividad.",q:"Produce sinterizado y grano desiguales entre centro y superficie.",e:"ΔT ≈ β·L²/(8α)"},
+ tcic:{n:"Duración del ciclo térmico",s:"t_c",u:"min",d:"Tiempo total de calentamiento, sostenimiento y enfriamiento.",p:"",q:"Determina el costo del horno por pieza."},
+ xn:{n:"Razón de cuello",s:"X/a",u:"",d:"Cociente entre el radio del cuello y el radio de la partícula. Mide la calidad de las uniones.",p:"Crece con la difusión (tiempo y temperatura) y el inverso del tamaño.",q:"Con X/a menor de 0,3 la pieza es frágil; con 0,5 a 0,7 ya tiene buenas propiedades.",e:"(X/a)ⁿ ∝ t·exp(−Q/RT)/aᵐ"},
+ df:{n:"Densidad final",s:"D_f",u:"% ρ_th",d:"Densidad relativa promedio de la pieza terminada.",p:"Se obtiene sumando a la densidad en verde el avance de la densificación por difusión, plasticidad o presión.",q:"Es la variable con más efecto sobre las propiedades mecánicas.",e:"D = D_g + ξ·(D_máx − D_g)"},
+ dfg:{n:"Densidad final",s:"ρ",u:"g/cm³",d:"Densidad absoluta de la pieza terminada.",p:"",q:""},
+ shr:{n:"Contracción lineal",s:"ΔL/L",u:"%",d:"Reducción de las dimensiones respecto a la pieza en verde (isotrópica).",p:"Se compensa en el diseño de la matriz o del molde.",q:"Contracciones despareja causan deformación.",e:"ΔL/L = 1 − (D_g/D_f)^(1/3)"},
+ gr:{n:"Tamaño de grano",s:"d_g",u:"µm",d:"Tamaño medio de grano de la pieza terminada.",p:"Crece con la temperatura y el tiempo, frenado por los poros hasta que se cierran.",q:"Granos finos dan mayor dureza y resistencia (Hall–Petch).",e:"d_g³ − d₀³ = K·∫exp(−Q/RT)dt"},
+ hv:{n:"Dureza",s:"HV",u:"",d:"Dureza Vickers estimada.",p:"",q:"Cae con la porosidad y sube con el grano fino.",e:"HV ≈ HV₀·(1−p)²·f(cuello)"},
+ uts:{n:"Resistencia a la tracción",s:"σ_u",u:"MPa",d:"Resistencia a la tracción estimada de la pieza terminada.",p:"",q:"Se degrada exponencialmente con la porosidad y mejora con la calidad de los cuellos.",e:"σ ≈ σ₀·exp(−5,5 p)·Q_n"},
+ sy:{n:"Límite elástico",s:"σ_y",u:"MPa",d:"Límite de fluencia estimado.",p:"",q:""},
+ el:{n:"Alargamiento",s:"A",u:"%",d:"Deformación a la rotura estimada.",p:"",q:"Es la propiedad más sensible a la porosidad y a los cuellos débiles."},
+ em:{n:"Módulo elástico",s:"E",u:"GPa",d:"Rigidez estimada de la pieza porosa.",p:"",q:"",e:"E ≈ E₀·(1−p)^2,7"},
+ kt:{n:"Conductividad térmica",s:"k",u:"W/m·K",d:"Conductividad térmica estimada de la pieza.",p:"",q:"Los poros y los cuellos pequeños reducen el camino del calor."},
+ iacs:{n:"Conductividad eléctrica",s:"σ_e",u:"% IACS",d:"Conductividad eléctrica respecto al cobre recocido.",p:"",q:"Relevante en contactos eléctricos y disipadores."},
+ pc:{n:"Porosidad cerrada",s:"",u:"%",d:"Fracción de la porosidad que ya no está conectada a la superficie (por encima de D ≈ 0,92 los poros se cierran).",p:"La porosidad cerrada permite aplicar HIP sin lata y evita la absorción de fluidos.",q:"La abierta se usa a propósito en filtros y cojinetes autolubricados."},
+ masa:{n:"Masa de la pieza",s:"m",u:"g",d:"Masa de la pieza terminada.",p:"",q:""},
+ // costos
+ cMat:{n:"Polvo",d:"Masa de polvo (con merma) por su precio, corregido por morfología y finura.",p:"",q:"Los polvos finos y esféricos son mucho más caros."},
+ cEq:{n:"Consolidación",d:"Tiempo del equipo de prensado, isostático, HP, SPS, HIP o inyección por su tarifa.",p:"",q:""},
+ cHorno:{n:"Horno",d:"Tiempo de horno repartido entre las piezas del lote de horno, por su tarifa.",p:"",q:""},
+ cMO:{n:"Mano de obra",d:"Tiempo de operario por pieza.",p:"",q:""},
+ cE:{n:"Energía",d:"Energía de calentamiento y pérdidas del ciclo, repartida por pieza.",p:"",q:""},
+ cHer:{n:"Herramental",d:"Costo de la matriz o del molde repartido entre el lote.",p:"",q:""},
+ cTot:{n:"Costo unitario",s:"C_u",u:"COP/pieza",d:"Suma de polvo, consolidación, horno, mano de obra, energía y herramental por pieza.",p:"La barra muestra el componente dominante.",q:""},
+ // gráficas y visualización
+ campo:{n:"Campo mostrado",d:"Variable que se pinta sobre la sección de la pieza: esfuerzo axial, densidad, temperatura, razón de cuello, tamaño de grano, dureza, ligante o temperatura del fundido.",p:"En el modo automático cambia según la etapa: esfuerzo en el prensado, temperatura en el horno, ligante en el desligado.",q:""},
+ vect:{n:"Vectores",d:"Flechas del flujo de esfuerzos (axial, lateral y fricción) durante el prensado, o del flujo de calor (−k∇T) durante el ciclo térmico.",p:"",q:""},
+ prog:{n:"Avance del proceso",d:"Posición en la secuencia completa: compactación, expulsión y ciclo térmico (o inyección, desligado y sinterizado en MIM).",p:"El panel superior muestra las condiciones en cada instante.",q:""},
+ sonda:{n:"Punto inspeccionado",d:"Haz clic sobre la pieza para ver los valores locales de esfuerzo, densidad, temperatura, cuello y grano, y la microestructura correspondiente.",p:"",q:"La microestructura se dibuja con el cuello y la densidad de ese punto."},
+ diag:{n:"Diagnóstico",d:"Reglas que comparan los resultados con límites de prensa, de polvo, de gradiente y de temperatura.",p:"Cada fila explica la falla probable, su causa y una mejora concreta.",q:""},
+ g_heck:{n:"Compresibilidad (Heckel)",d:"Densidad en verde contra la presión aplicada para la mezcla actual, con la presión seleccionada marcada y la densidad si no hubiera fricción.",p:"Al inicio domina el reacomodo de partículas; luego la deformación plástica, con pendiente 1/Py.",q:""},
+ g_prop:{n:"Propiedades contra densidad",d:"Propiedades relativas al material denso (σ, E, k, A) según la densidad relativa, con la calidad de cuello actual.",p:"",q:"Muestra por qué la porosidad degrada tanto la resistencia y el alargamiento."},
+ g_temp:{n:"Efecto de la temperatura de sinterizado",d:"Densidad final y resistencia estimadas al variar la temperatura de sinterizado con el resto del ciclo fijo.",p:"La densificación aparece a partir de cierta temperatura y luego se satura.",q:"Hay un óptimo: más temperatura mejora los cuellos pero agranda el grano."},
+ g_size:{n:"Efecto del tamaño de polvo",d:"Contracción lineal y densidad final al variar el tamaño medio del polvo, manteniendo el ciclo.",p:"La cinética escala aproximadamente con d⁻³: polvos 10 veces menores sinterizan mucho más rápido.",q:""},
+ g_perf:{n:"Perfil axial de densidad",d:"Densidad relativa a lo largo de la altura, cerca del centro y cerca de la pared.",p:"Muestra el efecto de la fricción (gradiente) y del sinterizado o la presión en caliente.",q:""},
+ g_ciclo:{n:"Ciclo térmico y densificación",d:"Temperatura de control, del centro y de la superficie contra el tiempo, con la densidad promedio en el eje derecho.",p:"La diferencia entre centro y superficie es el gradiente térmico.",q:""},
+ g_dist:{n:"Distribución de tamaños",d:"Frecuencia y acumulado de la mezcla, suma de tres distribuciones lognormales.",p:"",q:""},
+ g_pack:{n:"Empaquetamiento contra fracción fina",d:"Densidad con golpeteo de una mezcla de las fracciones 1 y 2 al variar la proporción de finos (modelo de empaquetamiento lineal).",p:"El máximo indica la proporción óptima; depende de la relación de tamaños.",q:""},
+ g_cm:{n:"Compresibilidad de los materiales",d:"Curvas de Heckel de todos los materiales con el mismo polvo de referencia.",p:"Muestra que los materiales blandos compactan mucho más que los duros con igual presión.",q:""},
+ g_sint:{n:"Sinterabilidad de los materiales",d:"Grado de densificación de cada material con polvo de 20 µm y 60 minutos de sostenimiento contra la temperatura homóloga.",p:"Compara qué tan fácil se sinteriza cada uno.",q:""}
+};
+</script>
+<script>
+"use strict";
+const PI=Math.PI,RG=8.314,TH0=2.7e-10;
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+function fmt(v,d=2){if(typeof v!=="number") return String(v);if(!isFinite(v)) return "—";return v.toLocaleString("es-CO",{minimumFractionDigits:d,maximumFractionDigits:d});}
+function money(v){return "$ "+fmt(v,Math.abs(v)<100?1:0);}
+const PRESSES=[5,10,16,20,25,40,63,80,100,160,200,250,315,400,500,630,800,1000,1600,2500];
+function recPress(t){const n=t*1.25;for(const p of PRESSES) if(p>=n) return p;return Math.ceil(n/500)*500;}
+function erf(x){const s=x<0?-1:1;x=Math.abs(x);const t=1/(1+0.3275911*x);const y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);return s*y;}
+
+/* ================= POLVOS: EMPAQUETAMIENTO Y DISTRIBUCIÓN ================= */
+function lpm(ds,ys,bs){ // modelo de empaquetamiento lineal (De Larrard); ds decreciente
+ const n=ds.length;let g=1e9;
+ for(let i=0;i<n;i++){let s=0;
+  for(let j=0;j<i;j++){const b=1-Math.pow(1-ds[i]/ds[j],1.5);s+=(1-bs[i]+b*bs[i]*(1-1/bs[j]))*ys[j];}
+  for(let j=i+1;j<n;j++){const a=Math.sqrt(1-Math.pow(1-ds[j]/ds[i],1.02));s+=(1-a*bs[i]/bs[j])*ys[j];}
+  g=Math.min(g,bs[i]/Math.max(0.08,1-s));}
+ return Math.min(g,0.93);}
+const fcoh=(d,m)=>1/(1+Math.pow(m.d0/d,1.3));
+function blend(v){
+ const cl=[];
+ [1,2,3].forEach(i=>{const y=+v["y"+i];if(y>0) cl.push({d:+v["d"+i],y:y,mk:v["m"+i]});});
+ if(!cl.length) cl.push({d:+v.d1,y:100,mk:v.m1});
+ const ys=cl.reduce((s,c)=>s+c.y,0);cl.forEach(c=>{c.y/=ys;c.m=MORPH[c.mk]||MORPH.irr;});
+ cl.sort((a,b)=>b.d-a.d);
+ const ds=cl.map(c=>c.d),yy=cl.map(c=>c.y);
+ const bl=cl.map(c=>c.m.bl*fcoh(c.d,c.m)),bt=cl.map(c=>c.m.bt*fcoh(c.d,c.m));
+ const Dapp=lpm(ds,yy,bl),Dtap=Math.max(Dapp,lpm(ds,yy,bt));
+ const d32=1/cl.reduce((s,c)=>s+c.y/c.d,0);
+ const dS=1/cl.reduce((s,c)=>s+c.y/(c.d*c.m.prim),0);
+ const w=k=>cl.reduce((s,c)=>s+c.y*c.m[k],0);
+ const psi=w("psi"),Bm=w("B"),gs=w("gs"),mact=w("mact"),cost=w("cost"),fl=w("fl");
+ // distribución acumulada lognormal
+ const sg=Math.max(1.05,+v.sg||1.4),ls=Math.log(sg);
+ const L=[],F=[],f=[];const l0=Math.log(0.1),l1=Math.log(600),N=240;
+ let prev=0;
+ for(let i=0;i<=N;i++){const l=l0+(l1-l0)*i/N;let c=0;cl.forEach(k=>{c+=k.y*0.5*(1+erf((l-Math.log(k.d))/(Math.SQRT2*ls)));});L.push(Math.exp(l));F.push(c);f.push(c-prev);prev=c;}
+ const pct=q=>{for(let i=1;i<=N;i++) if(F[i]>=q){const t=(q-F[i-1])/Math.max(F[i]-F[i-1],1e-9);return Math.exp(Math.log(L[i-1])+t*(Math.log(L[i])-Math.log(L[i-1])));}return L[N];};
+ const HR=Dtap/Math.max(Dapp,1e-3);
+ let tH=12*(1+Math.pow(35/d32,1.6))*Math.pow(0.9/psi,1.5)*(0.75+0.25*HR/1.25)*fl;
+ if(d32<12||tH>60) tH=Infinity;
+ return {cl,ds,yy,bl,bt,Dapp,Dtap,d32,dS,dEff:dS*psi,psi,Bm,gs,mact,cost,HR,tH,d10:pct(0.1),d50:pct(0.5),d90:pct(0.9),cdf:{L,F,f}};
+}
+function optimBinary(v){ // mejor fracción fina para las fracciones 1 y 2 con relación de tamaños dada
+ const m1=MORPH[v.m1]||MORPH.irr,m2=MORPH[v.m2]||MORPH.irr;
+ const ds=[+v.d1,+v.d2],out=[];let best={y:0,phi:0};
+ for(let k=0;k<=50;k++){const yf=k/50,ys=[1-yf,yf];
+  const bt=[m1.bt*fcoh(ds[0],m1),m2.bt*fcoh(ds[1],m2)];
+  const phi=ds[1]<ds[0]?lpm(ds,ys,bt):bt[0];out.push([yf,phi]);if(phi>best.phi) best={y:yf,phi};}
+ return {curve:out,best};}
+
+/* ================= COMPACTACIÓN: HECKEL ================= */
+function heckelPar(M,B,D0){
+ const Py=M.Py*(1+0.12*Math.max(0,Math.log2(30/Math.max(B.d32,0.5))));
+ return {A:-Math.log(1-clamp(D0,0.05,0.9))+B.Bm,Py,K:1/Py};}
+const Dof=(P,A,K)=>1-Math.exp(-(K*P+A));
+const Pof=(D,A,K)=>Math.max(0,(-Math.log(1-clamp(D,0.01,0.9995))-A)/K);
+function PyT(M,PyBase,T){const h=(T+273.15)/(M.Tm+273.15),h0=293.15/(M.Tm+273.15);
+ let f=Math.pow(Math.max(0.02,(1-Math.min(h,0.98))/(1-h0)),1.6);if(M.Tl&&T>M.Tl) f*=0.4;return Math.max(1,PyBase*f);}
+
+/* ================= GEOMETRÍA Y MALLA ================= */
+function geoShape(v){
+ switch(v.geo){
+  case "pastilla":case "barra":return {ax:true,W:+v.D,H:+v.H,inside:(x,z)=>Math.abs(x)<=v.D/2};
+  case "buje":return {ax:true,W:+v.D,H:+v.H,inside:(x,z)=>Math.abs(x)<=v.D/2&&Math.abs(x)>=v.Di/2};
+  case "brida":case "cubo":return {ax:true,W:Math.max(v.D1,v.D2),H:+v.H1+ +v.H2,inside:(x,z)=>{const a=Math.abs(x),R=z<=v.H1?v.D1/2:v.D2/2;return a<=R&&a>=v.Di/2;}};
+  case "cono":return {ax:true,W:Math.max(v.Db,v.Dt),H:+v.H,inside:(x,z)=>Math.abs(x)<=(v.Db+(v.Dt-v.Db)*z/v.H)/2};
+  case "placa":return {ax:false,W:+v.Wp,H:+v.H,inside:(x,z)=>Math.abs(x)<=v.Wp/2};
+  case "copa":return {ax:true,W:+v.D,H:+v.H,inside:(x,z)=>Math.abs(x)<=v.D/2&&(z<=v.tb||Math.abs(x)>=v.Di/2)};
+ }
+ return {ax:true,W:20,H:10,inside:()=>true};}
+function geoErrors(v){const E=[];const g=v.geo;
+ if(g==="buje"&&v.Di>=v.D-2) E.push("El agujero debe ser menor que el diámetro exterior (pared mínima de 1 mm).");
+ if((g==="brida"||g==="cubo")&&(v.Di>=Math.min(v.D1,v.D2)-2)) E.push("El agujero debe ser menor que el diámetro del cubo menos 2 mm.");
+ if(g==="copa"&&(v.Di>=v.D-2||v.tb>=v.H-1)) E.push("Copa inválida: revisa el diámetro interior y el espesor del fondo.");
+ if(g==="cono"&&v.Dt>v.Db*1.05) E.push("El diámetro superior no debe superar al inferior.");
+ return E;}
+function buildGrid(v){
+ const S=geoShape(v),W=S.W,H=S.H;
+ let dxT=Math.min(Math.max(W,H)/60,Math.min(W,H)/14);
+ let nx=Math.max(8,Math.round(W/dxT)),nz=Math.max(8,Math.round(H/dxT));
+ while(nx*nz>1300){dxT*=1.1;nx=Math.max(8,Math.round(W/dxT));nz=Math.max(8,Math.round(H/dxT));}
+ const dx=W/nx,dz=H/nz,N=nx*nz;
+ const mask=new Uint8Array(N),wgt=new Float32Array(N),wh=new Float32Array(N),Hc=new Float32Array(N),th=new Float32Array(N);
+ for(let j=0;j<nz;j++)for(let i=0;i<nx;i++){const x=-W/2+(i+0.5)*dx,z=(j+0.5)*dz;if(S.inside(x,z)){mask[j*nx+i]=1;wgt[j*nx+i]=S.ax?Math.max(Math.abs(x),dx*0.25):1;}}
+ const Ly=+v.Ly||30;
+ for(let j=0;j<nz;j++){let i=0;while(i<nx){if(!mask[j*nx+i]){i++;continue;}const i0=i;while(i<nx&&mask[j*nx+i]) i++;const i1=i-1,len=(i1-i0+1)*dx,x0=-W/2+i0*dx,x1=-W/2+(i1+1)*dx;
+  let hw;if(S.ax) hw=(x0<=1e-6&&x1>=-1e-6)?len:2*len;else hw=2*len*Ly/(len+Ly);
+  for(let q=i0;q<=i1;q++){wh[j*nx+q]=hw;th[j*nx+q]=len;}}}
+ for(let i=0;i<nx;i++){let j=0;while(j<nz){if(!mask[j*nx+i]){j++;continue;}const j0=j;while(j<nz&&mask[j*nx+i]) j++;const j1=j-1;for(let q=j0;q<=j1;q++){Hc[q*nx+i]=(j1-j0+1)*dz;th[q*nx+i]=Math.min(th[q*nx+i],(j1-j0+1)*dz);}}}
+ let vol=0,area=0,wsum=0,side=0,cnt=0;
+ for(let j=0;j<nz;j++)for(let i=0;i<nx;i++){const k=j*nx+i;if(!mask[k]) continue;cnt++;vol+=S.ax?PI*wgt[k]*dx*dz:dx*dz*Ly;wsum+=wgt[k];
+  const xl=-W/2+i*dx,xr=xl+dx;
+  if(i===0||!mask[k-1]) side+=S.ax?2*PI*Math.abs(xl)*dz:dz*Ly;
+  if(i===nx-1||!mask[k+1]) side+=S.ax?2*PI*Math.abs(xr)*dz:dz*Ly;}
+ for(let i=0;i<nx;i++){let has=false;for(let j=0;j<nz;j++) if(mask[j*nx+i]) has=true;if(has){const x=-W/2+(i+0.5)*dx;area+=S.ax?PI*Math.max(Math.abs(x),dx*0.25)*dx:dx*Ly;}}
+ const top=new Int16Array(nx).fill(-1),bot=new Int16Array(nx).fill(-1);
+ for(let i=0;i<nx;i++)for(let j=0;j<nz;j++) if(mask[j*nx+i]){if(bot[i]<0) bot[i]=j;top[i]=j;}
+ let hmin=1e9,hmax=0;for(let k=0;k<N;k++) if(mask[k]){hmin=Math.min(hmin,Hc[k]);hmax=Math.max(hmax,Hc[k]);}
+ return {nx,nz,dx,dz,N,W,H,ax:S.ax,Ly,mask,wgt,wh,Hc,th,vol,area,side,wsum,cnt,top,bot,hmin,hmax,vol_cm3:vol/1000};}
+function wavg(G,F){let s=0;for(let k=0;k<G.N;k++) if(G.mask[k]) s+=F[k]*G.wgt[k];return s/G.wsum;}
+function frange(G,F){let a=1e30,b=-1e30;for(let k=0;k<G.N;k++) if(G.mask[k]){if(F[k]<a) a=F[k];if(F[k]>b) b=F[k];}return [a,b];}
+function blurRows(G,F,it){const {nx,nz,mask}=G;let A=F,B=new Float32Array(F.length);
+ for(let n=0;n<it;n++){for(let j=0;j<nz;j++)for(let i=0;i<nx;i++){const k=j*nx+i;if(!mask[k]){B[k]=0;continue;}let s=A[k]*2,w=2;
+  if(i>0&&mask[k-1]){s+=A[k-1];w++;}if(i<nx-1&&mask[k+1]){s+=A[k+1];w++;}B[k]=s/w;}
+  const t=A;A=B;B=t;}
+ return A;}
+function janssen(G,k0,act){
+ const {nx,nz,mask,wh,dz}=G,J=new Float32Array(nx*nz),kk=act==="flot"?0.65:1;
+ for(let i=0;i<nx;i++){let j=0;while(j<nz){while(j<nz&&!mask[j*nx+i]) j++;if(j>=nz) break;const j0=j;while(j<nz&&mask[j*nx+i]) j++;const j1=j-1;
+  const top=new Float32Array(j1-j0+1),bot=new Float32Array(j1-j0+1);let S=0;
+  for(let q=j1;q>=j0;q--){const a=0.5*kk*k0/wh[q*nx+i]*dz;S+=a;top[q-j0]=Math.exp(-S);S+=a;}
+  S=0;for(let q=j0;q<=j1;q++){const a=0.5*kk*k0/wh[q*nx+i]*dz;S+=a;bot[q-j0]=Math.exp(-S);S+=a;}
+  for(let q=j0;q<=j1;q++) J[q*nx+i]=act==="simple"?top[q-j0]:Math.max(top[q-j0],bot[q-j0]);}}
+ return J;}
+
+/* ================= PROPIEDADES DE LA PIEZA SINTERIZADA ================= */
+function propsAt(M,D,x,g){
+ const p=clamp(1-D,0,0.9),Qn=1-Math.exp(-3*clamp(x,0,1)),gf=clamp(Math.pow(20/clamp(g,0.3,400),0.08),0.8,1.15);
+ const uts=M.UTS*Math.exp(-5.5*p)*(0.25+0.75*Qn)*gf,sy=M.sy*Math.exp(-5*p)*(0.3+0.7*Qn)*gf;
+ return {Qn,uts,sy,hv:M.HV*Math.pow(1-p,2)*(0.55+0.45*Qn)*gf,el:M.A*Math.exp(-9*p)*Qn*Qn,E:M.E*Math.pow(1-p,2.7)*(0.5+0.5*Qn),k:M.k*Math.pow(1-p,1.5)*(0.3+0.7*Qn),se:M.se*Math.pow(1-p,1.7)*(0.3+0.7*Qn)};}
+const IACS=se=>se/58*100;
+
+/* ================= CINÉTICA DE SINTERIZADO ================= */
+function atmFac(M,atm){return (ATMF[M.cls]||ATMF.fer)[atm]??1;}
+function kin(M,B,v,dEff){
+ const af=atmFac(M,v.atm),Qe=M.Qs*1000*(v.fld&&v.proc==="sps"?0.94:1);
+ return {af,Qe,sf:Math.pow(10/Math.max(dEff,0.3),3),base:M.act*B.mact*af*(M.comp?0.6:1),Ps:6*M.gam/Math.max(dEff,0.3)};}
+function rateAt(K,M,T,P){const Tk=T+273.15;let m=K.base;if(M.lps&&M.Tl&&T>M.Tl) m*=300;if(P>0) m*=Math.pow(1+P/K.Ps,0.9);return Math.exp(-K.Qe/(RG*Tk))/Tk*m;}
+const xiOf=th=>1-Math.exp(-Math.pow(Math.max(th,0)/TH0,0.7));
+function neckOf(th,Dg){const x0=clamp(0.5*(Dg-0.5),0.02,0.25);return x0+(0.9-x0)*(1-Math.exp(-Math.pow(30*Math.max(th,0)/TH0,0.5)));}
+function grainOf(M,d0,gi,D){return Math.cbrt(Math.pow(d0,3)+M.Kg*gi*(0.2+0.8*Math.pow(clamp(D,0,1),10)));}
+function schedule(v,proc){
+ const hr=Math.max(1,+v.hr)/60,T=+v.T,th=Math.max(0.5,+v.t)*60,seg=[];let t=0;const T0=20;
+ const cool={prensa:20,cip:20,hp:25,sps:100,hip:5,mim:15}[proc]||20;
+ if(proc==="prensa"||proc==="cip"||proc==="mim"){const Td=Math.min(550,T-50);seg.push([0,T0]);t=(Td-T0)/hr;seg.push([t,Td]);if(proc!=="mim"){t+=15*60;seg.push([t,Td]);}t+=(T-Td)/hr;seg.push([t,T]);}
+ else{seg.push([0,T0]);t=(T-T0)/hr;seg.push([t,T]);}
+ const tHeat=t;t+=th;seg.push([t,T]);const tHold=t;t+=(T-100)/(cool/60);seg.push([t,100]);
+ return {seg,tTot:t,tHeat,tHold,tHoldStart:tHeat};}
+function Tsched(S,t){const s=S.seg;for(let i=1;i<s.length;i++) if(t<=s[i][0]){const f=(t-s[i-1][0])/Math.max(1e-9,s[i][0]-s[i-1][0]);return s[i-1][1]+f*(s[i][1]-s[i-1][1]);}return s[s.length-1][1];}
+function pSched(S,t,Pmax,proc){ // presión durante el ciclo (procesos asistidos)
+ if(proc==="hip"){const f=clamp((Tsched(S,t)-20)/Math.max(1,S.seg[1][1]-20),0,1);return t<=S.tHold?Pmax*Math.max(0.2,f):Pmax*clamp(1-(t-S.tHold)/(0.1*(S.tTot-S.tHold)),0,1);}
+ if(t<=S.tHold) return Pmax*clamp(0.15+0.85*t/(0.5*S.tHeat),0.15,1);
+ return Pmax*clamp(1-(t-S.tHold)/(0.05*(S.tTot-S.tHold)),0,1);}
+/* modelo 0D (una celda) para barridos */
+function sinter0D(M,B,v,o){
+ const S=schedule(o,o.proc),K=kin(M,B,o,B.dEff),hot=o.proc==="hp"||o.proc==="sps"||o.proc==="hip";
+ const cp=heckelPar(M,B,o.proc==="hip"?B.Dtap:B.Dapp);let th=0,gi=0,Db=o.Dg,Ppk=0;const n=260;
+ for(let s=0;s<=n;s++){const t=S.tTot*(s+0.5)/n,T=Tsched(S,t),dt=S.tTot/n,P=hot?pSched(S,t,o.P,o.proc):0;
+  th+=rateAt(K,M,T,P)*dt;gi+=Math.exp(-K.Qe/(RG*(T+273.15)))*dt;
+  if(P>0){const Pk=P*(o.Jm||1);Db=Math.max(Db,Dof(Pk,cp.A,1/PyT(M,cp.Py,T)));}}
+ const xi=xiOf(th*K.sf),D0=Db,Dm=hot?0.9995:Math.max(M.Dmax,M.lps&&M.Tl&&o.T>M.Tl?0.99:0);
+ const D=Math.min(0.9995,D0+xi*Math.max(0,Dm-D0));
+ return {D,x:neckOf(th*K.sf,o.Dg),g:grainOf(M,clamp(0.5*B.dEff,0.3,200),gi*K.base/Math.max(K.base,1e-9),D),xi,Db};}
+</script>
+<script>
+"use strict";
+/* ================= UTILIDADES DE MALLA ================= */
+function heapPush(h,k,p){h.push([p,k]);let i=h.length-1;while(i>0){const q=(i-1)>>1;if(h[q][0]<=h[i][0]) break;[h[q],h[i]]=[h[i],h[q]];i=q;}}
+function heapPop(h){const t=h[0],l=h.pop();if(h.length){h[0]=l;let i=0;for(;;){let a=2*i+1,b=a+1,m=i;if(a<h.length&&h[a][0]<h[m][0]) m=a;if(b<h.length&&h[b][0]<h[m][0]) m=b;if(m===i) break;[h[m],h[i]]=[h[i],h[m]];i=m;}}return t;}
+function dijkstra(G,src,cost){ // cost(k) por celda destino
+ const {nx,nz,N,mask,dx}=G,d=new Float64Array(N).fill(1e9),h=[];
+ src.forEach(k=>{d[k]=0;heapPush(h,k,0);});
+ const nb=[[1,0,1],[-1,0,1],[0,1,1],[0,-1,1],[1,1,1.414],[-1,1,1.414],[1,-1,1.414],[-1,-1,1.414]];
+ while(h.length){const [p,k]=heapPop(h);if(p>d[k]) continue;const i=k%nx,j=(k-i)/nx;
+  for(const [di,dj,w] of nb){const ii=i+di,jj=j+dj;if(ii<0||jj<0||ii>=nx||jj>=nz) continue;const q=jj*nx+ii;if(!mask[q]) continue;const np=p+w*dx*cost(q);if(np<d[q]){d[q]=np;heapPush(h,q,np);}}}
+ return d;}
+function distMap(G){const {nx,nz,N,mask}=G,src=[];
+ for(let j=0;j<nz;j++)for(let i=0;i<nx;i++){const k=j*nx+i;if(!mask[k]) continue;if(i===0||j===0||i===nx-1||j===nz-1||!mask[k-1]||!mask[k+1]||!mask[k-nx]||!mask[k+nx]) src.push(k);}
+ const d=dijkstra(G,src,()=>1);for(let k=0;k<N;k++) if(mask[k]) d[k]+=G.dx*0.5;return d;}
+function cgSolve(N,nx,ar,au,dg,b,x,tol,maxit){
+ const r=new Float64Array(N),z=new Float64Array(N),p=new Float64Array(N),Ap=new Float64Array(N);
+ const mv=(u,o)=>{for(let k=0;k<N;k++){let s=dg[k]*u[k];const a1=ar[k],a0=k>0?ar[k-1]:0,b1=au[k],b0=k>=nx?au[k-nx]:0;if(a1) s-=a1*u[k+1];if(a0) s-=a0*u[k-1];if(b1) s-=b1*u[k+nx];if(b0) s-=b0*u[k-nx];o[k]=s;}};
+ mv(x,Ap);let rz=0,bn=0;for(let k=0;k<N;k++){r[k]=b[k]-Ap[k];z[k]=r[k]/dg[k];p[k]=z[k];rz+=r[k]*z[k];bn+=b[k]*b[k];}
+ bn=Math.sqrt(bn)+1e-12;
+ for(let it=0;it<maxit;it++){mv(p,Ap);let pa=0;for(let k=0;k<N;k++) pa+=p[k]*Ap[k];if(Math.abs(pa)<1e-30) break;const al=rz/pa;let rn=0;
+  for(let k=0;k<N;k++){x[k]+=al*p[k];r[k]-=al*Ap[k];rn+=r[k]*r[k];}
+  if(Math.sqrt(rn)<tol*bn) break;let rz2=0;for(let k=0;k<N;k++){z[k]=r[k]/dg[k];rz2+=r[k]*z[k];}const be=rz2/rz;rz=rz2;for(let k=0;k<N;k++) p[k]=z[k]+be*p[k];}
+ return x;}
+
+/* ================= SIMULACIÓN TÉRMICA + DENSIFICACIÓN ================= */
+function runThermal(R,cfg){
+ const {G,M,B,v}=R,{nx,nz,N,mask,dx}=G,dxm=dx/1000,S=cfg.S,K=kin(M,B,v,B.dEff),d0g=clamp(0.5*B.dEff,0.3,200);
+ const T=new Float64Array(N).fill(20),Th=new Float64Array(N),Gi=new Float64Array(N),Db=Float32Array.from(cfg.D0),D=Float32Array.from(cfg.D0);
+ const x=new Float32Array(N),g=new Float32Array(N).fill(d0g),sg=new Float32Array(N);
+ const hp=cfg.hot?heckelPar(M,B,cfg.Dini):null,frames=[];
+ const ar=new Float64Array(N),au=new Float64Array(N),dg=new Float64Array(N),b=new Float64Array(N),Told=new Float64Array(N);
+ const kc=new Float64Array(N),rcv=new Float64Array(N);
+ const snap=(st,t,Tc,P)=>{const f={st,t,Tc,P,T:Float32Array.from(T),D:Float32Array.from(D),sig:Float32Array.from(sg),x:Float32Array.from(x),g:Float32Array.from(g),b:null};frames.push(f);return f;};
+ for(let k=0;k<N;k++) if(mask[k]){x[k]=neckOf(0,cfg.Dg?cfg.Dg[k]:D[k]);}
+ const nF=cfg.nF,w=[S.tHeat,S.tHold-S.tHeat,S.tTot-S.tHold],nfr=[Math.round(nF*0.4),Math.round(nF*0.3),0];nfr[2]=nF-nfr[0]-nfr[1];
+ const tf=[0];let t0=0;for(let p=0;p<3;p++){for(let q=1;q<=nfr[p];q++) tf.push(t0+w[p]*q/nfr[p]);t0+=w[p];}
+ const Pat=t=>cfg.press==="none"?0:pSched(S,t,cfg.P,cfg.proc);
+ const pjf=cfg.PJ;
+ const setSig=(P)=>{for(let k=0;k<N;k++) sg[k]=mask[k]?(cfg.press==="uni"?P*pjf[k]:P):0;};
+ setSig(Pat(0));snap(cfg.st,0,20,Pat(0));
+ let tp=0,Tcp=20;const ns=2;
+ for(let fi=1;fi<tf.length;fi++){
+  const tk=tf[fi],dtf=tk-tp;
+  for(let k=0;k<N;k++) if(mask[k]){kc[k]=M.k*Math.pow(D[k],1.8)*(0.3+0.7*(1-Math.exp(-3*x[k])));rcv[k]=M.rho*D[k]*M.cp;}
+  for(let s=0;s<ns;s++){
+   const t=tp+dtf*(s+1)/ns,dt=dtf/ns,Tc=Tsched(S,t),P=Pat(t),dTc=(Tc-Tcp)/dt;
+   if(cfg.press!=="none") setSig(P);
+   for(let k=0;k<N;k++){if(!mask[k]){dg[k]=1;b[k]=0;ar[k]=0;au[k]=0;continue;}
+    const kk=kc[k],rc=rcv[k],ha=cfg.h/dxm,id=1/(dxm*dxm);
+    let dgk=rc/dt,bk=rc/dt*T[k];
+    const i=k%nx,j=(k-i)/nx;
+    if(i<nx-1&&mask[k+1]){const a=0.5*(kk+kc[k+1])*id;ar[k]=a;dgk+=a;}else{ar[k]=0;dgk+=ha;bk+=ha*Tc;}
+    if(i>0&&mask[k-1]) dgk+=0.5*(kk+kc[k-1])*id;else{dgk+=ha;bk+=ha*Tc;}
+    if(j<nz-1&&mask[k+nx]){const a=0.5*(kk+kc[k+nx])*id;au[k]=a;dgk+=a;}else{au[k]=0;dgk+=ha;bk+=ha*Tc;}
+    if(j>0&&mask[k-nx]) dgk+=0.5*(kk+kc[k-nx])*id;else{dgk+=ha;bk+=ha*Tc;}
+    if(cfg.fJ>0&&dTc>0) bk+=cfg.fJ*rc*dTc;
+    dg[k]=dgk;b[k]=bk;}
+   cgSolve(N,nx,ar,au,dg,b,T,1e-6,60);
+   for(let k=0;k<N;k++){if(!mask[k]) continue;const Tk=T[k],Pk=cfg.press==="none"?0:sg[k];
+    Th[k]+=rateAt(K,M,Tk,Pk)*dt;Gi[k]+=Math.exp(-K.Qe/(RG*(Tk+273.15)))*dt;
+    if(cfg.hot&&Pk>0) Db[k]=Math.max(Db[k],Dof(Pk,hp.A,1/PyT(M,hp.Py,Tk)));}
+   Tcp=Tc;}
+  for(let k=0;k<N;k++){if(!mask[k]) continue;const Tk=T[k];let Dm=Math.max(M.Dmax,M.lps&&M.Tl&&Tk>M.Tl?0.99:0);if(cfg.hot&&sg[k]>0) Dm=Math.max(Dm,0.999);
+   const xi=xiOf(Th[k]*K.sf),Dn=Db[k]+xi*Math.max(0,Dm-Db[k]);D[k]=Math.min(0.9995,Math.max(D[k],Dn));x[k]=Math.max(x[k],neckOf(Th[k]*K.sf,cfg.Dg?cfg.Dg[k]:cfg.D0[k]));g[k]=grainOf(M,d0g,Gi[k],D[k]);}
+  tp=tk;snap(cfg.st,tk,Tcp,Pat(tk));}
+ return frames;}
+
+/* ================= TUBERÍAS POR PROCESO ================= */
+function zeroF(N){return new Float32Array(N);}
+function initCommon(R){
+ const {v,M,B,G}=R;R.dist=distMap(G);let dm=0;for(let k=0;k<G.N;k++) if(G.mask[k]&&R.dist[k]>dm) dm=R.dist[k];R.dmax=dm;
+ R.mass0=G.vol_cm3*M.rho/1000;R.frames=[];R.stages=[];R.ex={};}
+function addStage(R,k,n,i0){R.stages.push({k,n,i0,i1:R.frames.length-1});}
+function setScales(R,Dref){R.frames.forEach(f=>{const Da=wavg(R.G,f.D);let sx=1,sz=1;const hotU=(R.v.proc==="hp"||R.v.proc==="sps");
+ if(f.st==="press"||f.st==="eject"||f.st==="inject"||f.st==="debind"){sx=sz=f.sc||1;}
+ else if(hotU){sx=1;sz=Math.min(3,Dref/Da);}else{sx=sz=Math.min(1.6,Math.cbrt(Dref/Da));}
+ f.s=[sx,sz];});}
+function pipePress(R,iso){
+ const {v,M,B,G}=R,N=G.N,mask=G.mask,hk=heckelPar(M,B,B.Dapp);if(iso) hk.K*=1.5;R.hk=hk;
+ const mu=0.35*Math.exp(-1.2*(+v.lub)),Kr=0.25+0.45*0.85;R.mu=mu;R.Kr=Kr;
+ let PJ=new Float32Array(N),Jg=null;
+ const Dapp_p=Dof(v.P,hk.A,hk.K);
+ if(!iso){const J=blurRows(G,janssen(G,4*mu*Kr,v.act),2);Jg=J;
+  for(let k=0;k<N;k++) PJ[k]=J[k];
+  if(!v.multi&&G.hmax/G.hmin>1.08){let hb=0,ws=0;for(let k=0;k<N;k++) if(mask[k]){hb+=G.Hc[k]*G.wgt[k];ws+=G.wgt[k];}hb/=ws;
+   const e=(Dapp_p/B.Dapp-1)*hb,Pref=Pof(Dapp_p,hk.A,hk.K);R.ex.fill=true;
+   for(let k=0;k<N;k++) if(mask[k]){const Dt=clamp(B.Dapp*(1+e/G.Hc[k]),B.Dapp,0.985);PJ[k]*=clamp(Pof(Dt,hk.A,hk.K)/Math.max(Pref,1),0.35,3);}}}
+ else for(let k=0;k<N;k++) PJ[k]=mask[k]?1:0;
+ PJ=blurRows(G,PJ,iso?0:1);for(let k=0;k<N;k++) if(!mask[k]) PJ[k]=0;
+ const mk=(P)=>{const D=new Float32Array(N),sg=new Float32Array(N);for(let k=0;k<N;k++) if(mask[k]){sg[k]=P*PJ[k];D[k]=Dof(sg[k],hk.A,hk.K);}return {D,sg};};
+ const full=mk(v.P),Dg=full.D;const Dga=wavg(G,Dg),Pavg=wavg(G,full.sg);
+ R.Dg=Dg;R.Dgavg=Dga;R.DgR=frange(G,Dg);R.PJ=PJ;R.Pavg=Pavg;
+ const nP=14;
+ for(let q=0;q<=nP;q++){const P=v.P*Math.pow(q/nP,1.3),o=mk(P);const Da=wavg(G,o.D);
+  R.frames.push({st:"press",t:q/nP*8,Tc:20,P,sig:o.sg,D:o.D,T:new Float32Array(N).fill(20),x:zeroF(N),g:zeroF(N),b:null,prog:clamp((Da-B.Dapp)/Math.max(1e-6,Dga-B.Dapp),0,1),sc:1});}
+ addStage(R,"press","Compactación",0);
+ const E=M.E*1000*Math.pow(Dga,3)*0.7,sb=100*0.35*Pavg/E;R.sb=iso?sb*0.6:sb;
+ if(!iso){const i0=R.frames.length;for(let q=1;q<=4;q++){const u=q/4,D=new Float32Array(N),sg=new Float32Array(N);for(let k=0;k<N;k++) if(mask[k]){sg[k]=full.sg[k]*(1-u);D[k]=Dg[k]*(1-3*R.sb/100*u);}
+  R.frames.push({st:"eject",t:8+u*2,Tc:20,P:v.P*(1-u),sig:sg,D,T:new Float32Array(N).fill(20),x:zeroF(N),g:zeroF(N),b:null,prog:1,sc:1+R.sb/100*u});}addStage(R,"eject","Expulsión",i0);}
+ const Dini=new Float32Array(N);for(let k=0;k<N;k++) Dini[k]=mask[k]?Dg[k]*(1-(iso?0:3*R.sb/100)):0;
+ const i0=R.frames.length,S=schedule(v,iso?"cip":"prensa");R.S=S;
+ const fr=runThermal(R,{S,nF:54,h:150,fJ:0,D0:Dini,Dg:Dini,hot:false,press:"none",P:0,PJ:null,proc:"prensa",st:"sinter",Dini:0});
+ fr.forEach(f=>R.frames.push(f));addStage(R,"sinter","Sinterizado",i0);
+ R.Dstart=wavg(G,Dini);R.geoCompress=1;}
+function pipeHot(R){
+ const {v,M,B,G}=R,N=G.N,mask=G.mask,proc=v.proc,hot=true;
+ const Dini=new Float32Array(N).fill(0);let D0=proc==="hip"?(v.hstate==="can"?B.Dtap:0.93):B.Dapp;if(proc==="hip"&&v.hstate==="can") D0=B.Dtap;
+ for(let k=0;k<N;k++) if(mask[k]) Dini[k]=D0;
+ let PJ=new Float32Array(N);
+ if(proc==="hip"){for(let k=0;k<N;k++) PJ[k]=mask[k]?1:0;}
+ else{const mu=0.15,Kr=0.8;R.mu=mu;R.Kr=Kr;const J=blurRows(G,janssen(G,4*mu*Kr,v.act||"doble"),2);for(let k=0;k<N;k++) PJ[k]=mask[k]?J[k]:0;}
+ R.PJ=PJ;const S=schedule(v,proc);R.S=S;
+ let fJ=0;if(proc==="sps"){const sr=M.se/0.08;fJ=0.55*sr/(sr+3);}
+ R.fJ=fJ;R.hk=heckelPar(M,B,D0);
+ const fr=runThermal(R,{S,nF:60,h:proc==="hip"?400:1500,fJ,D0:Dini,Dg:Dini,hot,press:proc==="hip"?"iso":"uni",P:+v.P,PJ,proc,st:proc,Dini:D0});
+ fr.forEach(f=>R.frames.push(f));addStage(R,proc,proc==="hip"?"Ciclo HIP":proc==="sps"?"Ciclo SPS":"Prensado en caliente",0);
+ R.Dstart=D0;R.Dg=Dini;R.Dgavg=D0;R.DgR=[D0,D0];
+ let Pav=0,ws=0;for(let k=0;k<N;k++) if(mask[k]){Pav+=v.P*PJ[k]*G.wgt[k];ws+=G.wgt[k];}R.Pavg=Pav/ws;}
+function pipeMIM(R){
+ const {v,M,B,G}=R,N=G.N,mask=G.mask,dx=G.dx,Phi=clamp(+v.load/100,0.4,0.74),bd=BINDERS[v.binder]||BINDERS.cera;
+ const Dini=new Float32Array(N);for(let k=0;k<N;k++) if(mask[k]) Dini[k]=Phi;
+ R.Dstart=Phi;R.Dg=Dini;R.Dgavg=Phi;R.DgR=[Phi,Phi];R.PJ=null;R.Pavg=0;
+ // llenado: distancia geodésica desde la entrada con velocidad dependiente del espesor
+ let hm=0,cn=0;for(let k=0;k<N;k++) if(mask[k]){hm+=G.th[k];cn++;}hm/=cn;
+ const src=[];const top=G.top,bot=G.bot,nx=G.nx,nz=G.nz;
+ const nearest=(pred,pick)=>{let best=-1,bd2=1e9;for(let i=0;i<nx;i++){const j=pick(i);if(j<0) continue;const d=pred(i);if(d<bd2){bd2=d;best=j*nx+i;}}return best;};
+ let gk;if(v.gate==="borde") gk=nearest(i=>Math.abs(i-(nx-1)),i=>top[i]);else if(v.gate==="base") gk=nearest(i=>Math.abs(i-(nx-1)/2),i=>bot[i]);else gk=nearest(i=>Math.abs(i-(nx-1)/2),i=>top[i]);
+ src.push(gk);R.gate=gk;
+ const arr=dijkstra(G,src,k=>Math.pow(hm/Math.max(G.th[k],G.dx),0.5));
+ let amax=0;for(let k=0;k<N;k++) if(mask[k]&&arr[k]<1e8&&arr[k]>amax) amax=arr[k];
+ const tFill=clamp(G.vol_cm3*1.12/Math.max(1,+v.vinj),0.2,40);R.tFill=tFill;R.ex.gate=gk;
+ const aF=1.2*1;let fimax=0;const an=new Float32Array(N);
+ for(let k=0;k<N;k++) if(mask[k]){an[k]=arr[k]/amax;const h2=Math.max(G.th[k],0.5)/2,tau=h2*h2/(PI*PI*1.0),ta=an[k]*tFill;const fi=ta/(aF*tau*(1+0.02*(v.Tinj-v.Tmold)/ 30));fimax=Math.max(fimax,fi);}
+ R.fimax=fimax;R.arr=an;
+ const nI=14;
+ for(let q=1;q<=nI;q++){const ph=q/nI,b=new Float32Array(N).fill(NaN);
+  for(let k=0;k<N;k++) if(mask[k]&&an[k]<=ph){const h2=Math.max(G.th[k],0.5)/2,tau=h2*h2/(PI*PI*1.0)+0.05,tc=(ph-an[k])*tFill;b[k]=+v.Tmold+(+v.Tinj-v.Tmold)*Math.exp(-(tc+an[k]*tFill*0.25)/tau);}
+  R.frames.push({st:"inject",t:ph*tFill,Tc:+v.Tinj,P:0,sig:zeroF(N),D:Dini,T:b,x:zeroF(N),g:zeroF(N),b,prog:ph,sc:Math.cbrt(0.98/Phi)});}
+ addStage(R,"inject","Inyección",0);
+ // desligado
+ const Dbe=bd.Db*6,tdeb=Math.max(0.5,R.dmax*R.dmax/Dbe);R.tdeb=tdeb;const i0=R.frames.length;
+ for(let q=0;q<=12;q++){const u=q/12,s=Math.sqrt(Dbe*tdeb*u),b=new Float32Array(N).fill(NaN);
+  for(let k=0;k<N;k++) if(mask[k]) b[k]=clamp((R.dist[k]-s)/(0.25*s+0.3),0,1);
+  R.frames.push({st:"debind",t:u*tdeb*3600,Tc:60,P:0,sig:zeroF(N),D:Dini,T:new Float32Array(N).fill(60),x:zeroF(N),g:zeroF(N),b,prog:u,sc:Math.cbrt(0.98/Phi)});}
+ addStage(R,"debind","Desligado",i0);
+ const i1=R.frames.length,S=schedule(v,"mim");R.S=S;
+ const fr=runThermal(R,{S,nF:54,h:100,fJ:0,D0:Dini,Dg:Dini,hot:false,press:"none",P:0,PJ:null,proc:"mim",st:"sinter",Dini:0});
+ fr.forEach(f=>R.frames.push(f));addStage(R,"sinter","Sinterizado",i1);}
+
+/* ================= RESULTADOS FINALES ================= */
+function finish(R){
+ const {G,M,v}=R,N=G.N,mask=G.mask,fl=R.frames[R.frames.length-1];R.last=fl;
+ const Dref=wavg(G,fl.D);setScales(R,Dref);
+ const pr={hv:new Float32Array(N),uts:new Float32Array(N),sy:new Float32Array(N),el:new Float32Array(N),E:new Float32Array(N),k:new Float32Array(N),se:new Float32Array(N)};
+ for(let k=0;k<N;k++) if(mask[k]){const p=propsAt(M,fl.D[k],fl.x[k],fl.g[k]);pr.hv[k]=p.hv;pr.uts[k]=p.uts;pr.sy[k]=p.sy;pr.el[k]=p.el;pr.E[k]=p.E;pr.k[k]=p.k;pr.se[k]=p.se;}
+ R.pr=pr;const f={Df:Dref,Dr:frange(G,fl.D),x:wavg(G,fl.x),g:wavg(G,fl.g),gR:frange(G,fl.g),hv:wavg(G,pr.hv),uts:wavg(G,pr.uts),sy:wavg(G,pr.sy),el:wavg(G,pr.el),E:wavg(G,pr.E),k:wavg(G,pr.k),se:wavg(G,pr.se),hvR:frange(G,pr.hv)};
+ f.shr=1-Math.cbrt(R.Dstart/f.Df);f.mass=G.vol_cm3*M.rho/1000*f.Df;f.pc=clamp((f.Df-0.85)/0.1,0,1)*100;f.gcc=f.Df*M.rho/1000;f.Dgrad=(f.Dr[1]-f.Dr[0])*100;
+ f.x=clamp(f.x,0,1);R.fin=f;R.mass=f.mass;
+ // series térmicas
+ let cen=0,dm=-1;for(let k=0;k<N;k++) if(mask[k]&&R.dist[k]>dm){dm=R.dist[k];cen=k;}
+ let surf=[];for(let k=0;k<N;k++) if(mask[k]&&R.dist[k]<=G.dx*0.75) surf.push(k);
+ const th=R.frames.filter(q=>q.st==="sinter"||q.st==="hp"||q.st==="sps"||q.st==="hip");
+ R.ts={t:[],Tc:[],Tcen:[],Tsur:[],D:[],Dmin:[],Dmax:[],dT:[]};let dTm=0;
+ th.forEach(q=>{R.ts.t.push(q.t/60);R.ts.Tc.push(q.Tc);R.ts.Tcen.push(q.T[cen]);let s=0;surf.forEach(k=>s+=q.T[k]);R.ts.Tsur.push(s/Math.max(1,surf.length));
+  R.ts.D.push(wavg(G,q.D));const r=frange(G,q.D);R.ts.Dmin.push(r[0]);R.ts.Dmax.push(r[1]);const tr=frange(G,q.T);R.ts.dT.push(tr[1]-tr[0]);dTm=Math.max(dTm,tr[1]-tr[0]);});
+ R.dTmax=dTm;R.cen=cen;R.tcyc=R.S.tTot/60;
+ R.Jmean=R.PJ?wavg(G,R.PJ):1;}
+
+/* ================= CURVAS ================= */
+function curves(R){
+ const {v,M,B,G}=R,cv={},proc=v.proc,hk=R.hk||heckelPar(M,B,B.Dapp);
+ // compresibilidad
+ const Pm=proc==="mim"?600:Math.max(+v.P*1.6,100),ps=[],id=[],ac=[],ht=[];
+ for(let i=0;i<=40;i++){const P=Pm*i/40;ps.push(P);id.push(Dof(P,hk.A,hk.K*(proc==="cip"?1:1)));
+  let a=0;if(R.PJ&&(proc==="prensa")){let s=0;for(let k=0;k<G.N;k++) if(G.mask[k]) s+=Dof(P*R.PJ[k],hk.A,hk.K)*G.wgt[k];a=s/G.wsum;}else a=id[i];ac.push(a);
+  ht.push(Dof(P,hk.A,1/PyT(M,hk.Py,+v.T)));}
+ cv.heck={P:ps,id,ac,ht};
+ // propiedades vs densidad
+ const Ds=[],sr=[],er=[],kr=[],ar=[];const xq=R.fin.x,gq=R.fin.g;
+ for(let i=0;i<=40;i++){const D=0.6+0.4*i/40,p=propsAt(M,D,xq,gq);Ds.push(D);sr.push(p.uts/M.UTS);er.push(p.E/M.E);kr.push(p.k/M.k);ar.push(M.A>0?p.el/M.A:0);}
+ cv.prop={D:Ds,s:sr,e:er,k:kr,a:ar};
+ // T de sinterizado
+ const T0=Math.max(350,0.45*(M.Tm+273)-273),T1=Math.min(M.Tm-15,1.02*M.Ts+80),Ts=[],Dd=[],Us=[],Gs=[];
+ for(let i=0;i<=28;i++){const T=T0+(T1-T0)*i/28,o=Object.assign({},v,{T});const r=sinter0D(M,B,v,{proc:proc==="mim"?"mim":proc,T,t:v.t,hr:v.hr,atm:v.atm,fld:v.fld,P:+v.P,Dg:R.Dstart,Jm:R.Jmean});
+  const p=propsAt(M,r.D,r.x,r.g);Ts.push(T);Dd.push(r.D);Us.push(p.uts);Gs.push(r.g);}
+ cv.temp={T:Ts,D:Dd,U:Us,G:Gs};
+ // tamaño de polvo
+ const ds=[],Ds2=[],Sh=[];
+ for(let i=0;i<=24;i++){const d=Math.exp(Math.log(1)+(Math.log(200)-Math.log(1))*i/24);const B2=Object.assign({},B,{dEff:d*B.psi,dS:d,d32:d});
+  const r=sinter0D(M,B2,v,{proc,T:+v.T,t:v.t,hr:v.hr,atm:v.atm,fld:v.fld,P:+v.P,Dg:R.Dstart,Jm:R.Jmean});ds.push(d);Ds2.push(r.D);Sh.push(100*(1-Math.cbrt(R.Dstart/r.D)));}
+ cv.size={d:ds,D:Ds2,S:Sh};
+ // perfil axial
+ const nz=G.nz,nx=G.nx,fl=R.last,pa={z:[],gi:[],gw:[],fi:[],fw:[]};
+ for(let j=0;j<nz;j++){let si=0,wi=0,sw=0,ww=0,gi=0,gw=0;for(let i=0;i<nx;i++){const k=j*nx+i;if(!G.mask[k]) continue;const inner=R.dist[k]>G.dx*1.6;
+   if(inner){si+=fl.D[k];gi+=R.Dg[k];wi++;}else{sw+=fl.D[k];gw+=R.Dg[k];ww++;}}
+  if(wi+ww===0) continue;pa.z.push((j+0.5)*G.dz);pa.fi.push(wi?si/wi:null);pa.fw.push(ww?sw/ww:null);pa.gi.push(wi?gi/wi:null);pa.gw.push(ww?gw/ww:null);}
+ cv.perf=pa;cv.ciclo=R.ts;return cv;}
+
+/* ================= COSTOS ================= */
+function costs(R){
+ const {v,M,B}=R,proc=v.proc,lote=Math.max(1,+v.lote),mass=R.mass0*R.fin.Df*0.001; // kg
+ const scrap={prensa:0.02,cip:0.03,hp:0.05,sps:0.05,hip:0.03,mim:0.06}[proc];
+ const pricef=B.cost*(1+0.3*Math.sqrt(20/Math.max(B.d32,1)));
+ const cMat=mass*(1+scrap)*M.price*pricef*(proc==="mim"?1+0.12*(BINDERS[v.binder]||BINDERS.cera).cost:1);
+ const tc=R.tcyc/60,tmain={prensa:6/3600,cip:(20/60)/20,hp:tc/2,sps:tc,hip:tc/30,mim:30/3600}[proc];
+ const nEq=proc==="hp"||proc==="sps"?1:1,rateEq=+v.tEq;
+ const cEq=tmain*rateEq;
+ const batch={prensa:200,cip:200,hp:2,sps:1,hip:30,mim:500}[proc];
+ const tHor=proc==="hp"||proc==="sps"||proc==="hip"?0:tc;
+ const cHorno=tHor/batch*(+v.tHorno)+(proc==="mim"?R.tdeb/200*(+v.tHorno)*0.6:0);
+ const cMO=(proc==="prensa"?8/3600:proc==="cip"?2/60:proc==="hp"?0.4:proc==="sps"?0.25:proc==="hip"?0.03:20/3600)*(+v.tMO);
+ const cp=M.cp,dT=(+v.T-20),Eheat=mass*cp*dT/0.3/3.6e6,Ploss={prensa:25,cip:0,hp:40,sps:55,hip:80,mim:30}[proc];
+ const tE=proc==="hp"||proc==="sps"||proc==="hip"?tc:tc;const kWh=Eheat*(proc==="hip"?1:1)+Ploss*tE/batch;
+ const cE=kWh*(+v.pE);
+ const cHer=(+v.herr)/lote;
+ const tot=cMat+cEq+cHorno+cMO+cE+cHer;
+ return {cMat,cEq,cHorno,cMO,cE,cHer,tot,kg:tot/Math.max(mass,1e-6),kWh,tmain,batch,mass};}
+
+/* ================= DIAGNÓSTICO ================= */
+function diagnose(R){
+ const {v,M,B,G,fin}=R,D=[],proc=v.proc,add=(lv,t,c,f)=>D.push({lv,t,c,f});
+ const Tk=+v.T+273.15,hom=Tk/(M.Tm+273.15);
+ if(R.geoErr) add("bad","Geometría inválida",R.geoErr.join(" "),"Corrige las dimensiones; se usó una geometría por defecto para calcular.");
+ if(v.geo==="copa"&&(proc==="prensa"||proc==="hp"||proc==="sps")) add("bad","Copa no prensable en matriz rígida","La cavidad ciega exige un núcleo que no puede extraerse de una pieza prensada uniaxialmente.","Fabrícala por CIP con mandril, MIM o HIP con lata.");
+ if(B.tH===Infinity&&(proc==="prensa"||proc==="hp")) add("warn","El polvo no fluye en el embudo de Hall","El diámetro de Sauter ("+fmt(B.d32,1)+" µm) y la forma generan cohesión alta.","Granula el polvo, agrega una fracción gruesa o usa alimentación asistida.");
+ if(B.cl.length===1&&B.d32>20&&proc!=="mim"){const o=optimBinary(Object.assign({},v,{d2:Math.max(1,v.d1/7),m2:v.m1}));if(o.best.phi>B.Dtap+0.05) add("info","Una mezcla bimodal mejoraría el empaquetamiento","Con un solo tamaño el empaquetamiento es "+fmt(B.Dtap*100,0)+" %.","Agrega ≈ "+fmt(o.best.y*100,0)+" % de una fracción de "+fmt(v.d1/7,1)+" µm: sube hasta ≈ "+fmt(o.best.phi*100,0)+" %.");}
+ if(proc==="prensa"||proc==="cip"){
+  const g=R.DgR,dd=(g[1]-g[0])*100;
+  if(dd>5) add("bad","Gradiente de densidad alto ("+fmt(dd,1)+" pp)","Fricción con la pared"+(R.ex.fill?" y llenado desigual entre escalones":"")+".","Usa doble acción o matriz flotante, sube el lubricante"+(R.ex.fill?", o herramental multinivel":"")+", o reduce H/D.");
+  else if(dd>3) add("warn","Gradiente de densidad moderado ("+fmt(dd,1)+" pp)","La presión decae con la profundidad (Janssen).","Considera doble acción o más lubricante.");
+  if(R.sb>0.6) add("bad","Recuperación elástica alta ("+fmt(R.sb,2)+" %)","Presión alta y módulo elástico bajo: riesgo de laminación al expulsar.","Baja la presión, usa polvo más irregular o reduce el aire atrapado.");
+  else if(R.sb>0.4) add("warn","Recuperación elástica elevada ("+fmt(R.sb,2)+" %)","Energía elástica almacenada.","Expulsión lenta y matriz con conicidad.");
+  if(proc==="prensa"){const sgr=60*B.gs*Math.pow(Math.max(0,(R.Dgavg-0.55)/0.45),2)*clamp(Math.sqrt(250/M.Py),0.4,1.6);R.sgr=sgr;
+   if(sgr<8) add("warn","Resistencia en verde baja ("+fmt(sgr,1)+" MPa)","Polvo demasiado esférico o blando: no se traba mecánicamente.","Agrega polvo irregular o esponjoso, o aumenta la presión.");}
+  if(v.act==="simple"&&G.ax&&G.hmax/(G.W)>1.2) add("warn","Pieza alta con acción simple","H/D = "+fmt(G.hmax/G.W,1)+": la fricción acumulada deja un extremo poco denso.","Acción doble o matriz flotante.");
+  if(R.Dgavg>0.93) add("info","Densidad en verde muy alta","Está cerca del límite práctico de compactación.","Más presión ya no compensa el desgaste del herramental.");
+ }
+ if(proc==="mim"){const ld=+v.load/100;
+  if(ld>B.Dtap*0.98) add("bad","Carga de sólidos por encima de la carga crítica","Φ = "+fmt(ld*100,0)+" % supera el empaquetamiento del polvo ("+fmt(B.Dtap*100,0)+" %): no hay ligante suficiente para lubricar.","Baja la carga a "+fmt(B.Dtap*93,0)+" % o mejora el empaquetamiento con una mezcla bimodal.");
+  else if(ld<B.Dtap*0.85) add("warn","Carga de sólidos baja","Mucho ligante: más contracción y riesgo de deformación.","Sube la carga hasta ≈ "+fmt(B.Dtap*93,0)+" %.");
+  if(B.d32>40) add("warn","Polvo demasiado grueso para MIM","Con "+fmt(B.d32,0)+" µm la materia prima se segrega y sinteriza poco.","Usa polvo esférico de 5 a 20 µm.");
+  if(R.fimax>1) add("bad","Llenado corto probable","El frente se enfría antes de llegar a las paredes delgadas (índice "+fmt(R.fimax,1)+").","Sube la temperatura del molde o del fundido, o el caudal; mueve la entrada.");
+  else if(R.fimax>0.6) add("warn","Frente cerca del congelamiento","Las secciones delgadas se llenan con poco margen.","Sube el caudal o la temperatura de molde.");
+  if(R.tdeb>24) add("warn","Desligado largo ("+fmt(R.tdeb,0)+" h)","Secciones gruesas (hasta "+fmt(R.dmax*2,1)+" mm) y ligante lento.","Usa POM con desligado catalítico o adelgaza la sección.");
+  else if(R.dmax>5) add("warn","Sección gruesa para MIM","Mayor riesgo de grietas y ampollas en el desligado.","Aligera la pieza con nervaduras.");
+  if((v.geo==="buje"||v.geo==="brida"||v.geo==="cubo")&&v.gate!=="centro") add("info","Línea de soldadura detrás del agujero","El frente se divide alrededor del núcleo y se reúne al otro lado.","Coloca la entrada en el centro o aumenta la temperatura del molde.");
+  if(fin.shr>0.2) add("warn","Contracción lineal alta ("+fmt(fin.shr*100,1)+" %)","Carga de sólidos baja.","Compensa el molde y controla el apoyo para evitar deformación.");}
+ if(M.lps&&M.Tl){if(+v.T<M.Tl) add("warn","Sin fase líquida","La temperatura ("+v.T+" °C) está por debajo de la formación de líquido ("+M.Tl+" °C): el sinterizado es lento.","Sube a "+(M.Tl+25)+" – "+(M.Tl+60)+" °C.");else if(+v.T>M.Tl+120) add("warn","Exceso de líquido","La temperatura supera en más de 120 °C la formación de líquido: riesgo de hundimiento y exudación.","Baja el ciclo o acorta el sostenimiento.");}
+ const marg=M.Tm-(+v.T);
+ if(marg<30&&!M.lps) add("bad","Temperatura demasiado cercana a la fusión","Solo "+fmt(marg,0)+" K bajo el solidus: riesgo de fusión local y deformación por peso propio.","Baja 50 a 100 °C.");
+ else if(marg<70&&!M.lps&&hom>0.9) add("warn","Temperatura muy alta","A "+fmt(marg,0)+" K del solidus el grano crece rápido y la pieza puede deformarse.","Reduce la temperatura o el tiempo.");
+ const af=atmFac(M,v.atm),aw=(ATMW[M.cls]||{})[v.atm];
+ if(aw||af<0.3) add(af<0.3?"bad":"warn","Atmósfera inadecuada",aw||"La atmósfera no reduce los óxidos de este material.","Usa "+(M.atm.map(a=>ATMS.find(z=>z[0]===a)[1]).join(" o "))+".");
+ if(fin.x<0.3&&proc!=="hip") add("warn","Cuello débil (X/a = "+fmt(fin.x,2)+")","Temperatura, tiempo o atmósfera insuficientes para el tamaño de polvo.","Sube la temperatura, alarga el sostenimiento o usa polvo más fino.");
+ if(fin.Df<0.88&&proc!=="mim") add("info","Densidad final baja ("+fmt(fin.Df*100,1)+" %)","La porosidad degrada mucho la resistencia y el alargamiento.","Sube la presión, agrega finos o pasa a un proceso asistido por presión.");
+ if(fin.Df>0.985) add("ok","Densidad casi completa ("+fmt(fin.Df*100,1)+" %)","Los poros están cerrados y las propiedades se acercan al material denso.","");
+ if(R.dTmax>80) add("bad","Gradiente térmico alto ("+fmt(R.dTmax,0)+" K)","Calentamiento rápido en una pieza grande o poco conductora.","Baja la velocidad de calentamiento o agrega una meseta de homogeneización.");
+ else if(R.dTmax>35) add("warn","Gradiente térmico apreciable ("+fmt(R.dTmax,0)+" K)","El centro va detrás de la superficie durante el calentamiento.","Reduce la velocidad de calentamiento.");
+ if(fin.gR[1]/Math.max(fin.gR[0],0.1)>1.6) add("warn","Grano desigual entre zonas","La temperatura local difirió entre centro y superficie.","Reduce el gradiente térmico.");
+ if(fin.g/Math.max(0.5*B.dEff,0.3)>5&&fin.g>40) add("warn","Crecimiento de grano excesivo ("+fmt(fin.g,0)+" µm)","Sostenimiento largo o temperatura alta.","Acorta el tiempo o baja la temperatura: el grano fino da más resistencia.");
+ if(proc==="hip"&&v.hstate==="pres") add("info","HIP sin lata","Requiere porosidad cerrada (D > 92 %) antes del ciclo.","Sinteriza previamente hasta cerrar los poros superficiales.");
+ if(proc==="sps"&&+v.hr>300&&G.H>15) add("warn","Calentamiento muy rápido en pieza alta","Rampas de "+v.hr+" K/min en "+fmt(G.H,0)+" mm de espesor.","Baja a 100 – 200 K/min o agrega una meseta.");
+ if(proc==="prensa"&&fin.shr>0.03) add("info","Contracción de sinterizado de "+fmt(fin.shr*100,1)+" %","La contracción alta exige compensar la matriz.","Sube la densidad en verde para reducirla.");
+ if(R.C&&R.C.cMat/R.C.tot>0.6) add("info","El polvo domina el costo","El "+fmt(R.C.cMat/R.C.tot*100,0)+" % del costo unitario es material.","Usa polvo de menor costo si la aplicación lo permite.");
+ if(!D.length) add("ok","Sin alertas","Los resultados están dentro de los límites usuales.","");
+ R.verdict=D.some(d=>d.lv==="bad")?"bad":D.some(d=>d.lv==="warn")?"warn":"ok";return D;}
+
+/* ================= EVALUACIÓN Y VALORES POR DEFECTO ================= */
+function evaluate(v0){
+ let v=Object.assign({},v0);const M=matById(v.mat),ge=geoErrors(v);
+ let geoErr=null;if(ge.length){geoErr=ge;v=Object.assign(v,GEOS[v.geo].def);}
+ const B=blend(v),G=buildGrid(v),R={v,M,B,G,geoErr};
+ initCommon(R);
+ const p=v.proc;
+ if(p==="prensa") pipePress(R,false);else if(p==="cip") pipePress(R,true);else if(p==="mim") pipeMIM(R);else pipeHot(R);
+ finish(R);R.cv=curves(R);R.C=costs(R);R.diag=diagnose(R);return R;}
+function procDefaults(proc,M){
+ const P={prensa:clamp(Math.round(1.4*M.Py/10)*10,150,800),cip:clamp(Math.round(0.45*M.Py/10)*10,100,400),hp:M.cls==="al"?40:50,sps:50,hip:150,mim:0}[proc];
+ const T={prensa:M.Ts,cip:M.Ts,hp:M.Th,sps:M.Th,hip:M.Thip,mim:M.Ts}[proc];
+ const t={prensa:30,cip:60,hp:30,sps:5,hip:120,mim:90}[proc],hr={prensa:10,cip:5,hp:15,sps:100,hip:10,mim:5}[proc];
+ const atm=proc==="hip"?"ar":(proc==="hp"||proc==="sps")&&M.cls!=="fer"&&M.cls!=="cu"?"vac":(proc==="hp"||proc==="sps")?"vac":M.atm[0];
+ const o={P,T,t,hr,atm};if(proc==="mim"){o.load=63;o.binder="cera";o.Tinj=175;o.Tmold=40;o.vinj=20;o.gate="centro";}
+ return o;}
+const BASE={proc:"prensa",geo:"cubo",mat:"fc0208",D:20,H:10,Di:8,D1:32,H1:6,D2:14,H2:8,Db:24,Dt:12,Wp:30,Ly:40,tb:4,
+ d1:75,y1:100,m1:"irr",d2:10,y2:0,m2:"irr",d3:2,y3:0,m3:"irr",sg:1.4,lub:0.75,P:600,act:"doble",multi:true,T:1120,t:30,hr:10,atm:"n2h2",fld:false,hstate:"can",
+ load:63,binder:"cera",Tinj:175,Tmold:40,vinj:20,gate:"centro",lote:10000,herr:45000000,tEq:120000,tHorno:150000,tMO:18000,pE:850};
+const PHERR={prensa:45e6,cip:5e6,hp:2e6,sps:3e6,hip:1.5e6,mim:90e6},PTEQ={prensa:120000,cip:200000,hp:350000,sps:500000,hip:900000,mim:140000};
+const EXAMPLES=[
+ {n:"Buje autolubricante de bronce",d:"Cojinete poroso Cu-10Sn prensado y sinterizado con fase líquida.",o:{proc:"prensa",geo:"buje",mat:"bronce",D:22,Di:12,H:16,d1:45,m1:"irr",P:250,T:800,t:25,hr:10,atm:"n2h2",act:"doble",lub:1}},
+ {n:"Piñón con cubo de acero",d:"Engranaje Fe-2Cu-0,8C con doble nivel, herramental multinivel.",o:{proc:"prensa",geo:"cubo",mat:"fc0208",d1:75,m1:"irr",P:600,T:1120,t:30,hr:10,atm:"n2h2",act:"doble",multi:true,lub:0.75}},
+ {n:"Contacto eléctrico de cobre",d:"Pastilla de Cu de alta conductividad prensada y sinterizada.",o:{proc:"prensa",geo:"pastilla",mat:"cu",D:20,H:8,d1:45,m1:"den",P:350,T:900,t:40,hr:10,atm:"n2h2",act:"doble"}},
+ {n:"Implante de titanio por SPS",d:"Disco de Ti-6Al-4V consolidado en 5 minutos con corriente pulsada.",o:{proc:"sps",geo:"pastilla",mat:"ti64",D:30,H:8,d1:45,m1:"esf",P:50,T:1000,t:5,hr:100,atm:"vac",fld:true}},
+ {n:"Copa de acero 316L por MIM",d:"Crisol pequeño inyectado con polvo esférico fino.",o:{proc:"mim",geo:"copa",mat:"ss316",D:24,Di:16,tb:4,H:18,d1:15,m1:"esf",load:63,T:1350,t:90,hr:5,atm:"h2",binder:"pom",gate:"centro"}},
+ {n:"Cono de Inconel 718 por HIP",d:"Preforma de superaleación densificada con gas a alta presión.",o:{proc:"hip",geo:"cono",mat:"in718",Db:40,Dt:22,H:30,d1:30,m1:"esf",P:150,T:1160,t:180,hr:10,atm:"ar",hstate:"can"}},
+ {n:"Compuesto Al-Cu / SiC prensado en caliente",d:"Matriz de aluminio con refuerzo cerámico por encima del eutéctico.",o:{proc:"hp",geo:"pastilla",mat:"alcusic",D:30,H:10,d1:25,m1:"irr",P:40,T:560,t:30,hr:15,atm:"vac",act:"doble"}},
+ {n:"Plaquita de metal duro WC-10Co",d:"Placa de carburo cementado con sinterizado de fase líquida.",o:{proc:"prensa",geo:"placa",mat:"wcco",Wp:16,Ly:16,H:6,d1:80,m1:"gra",P:150,T:1400,t:60,hr:5,atm:"vac",act:"doble",lub:1.5}},
+ {n:"Barra esbelta (reto de fricción)",d:"H/D = 3 con acción simple: mira el gradiente de densidad.",o:{proc:"prensa",geo:"barra",mat:"fe",d1:75,m1:"irr",P:600,T:1120,t:30,hr:10,atm:"n2h2",act:"simple",lub:0.3}},
+ {n:"Mezcla bimodal de hierro",d:"Polvo grueso con 25 % de finos: sube la densidad en verde.",o:{proc:"prensa",geo:"pastilla",mat:"fe",d1:75,m1:"irr",y1:75,d2:10,m2:"irr",y2:25,P:500,T:1120,t:30,hr:10,atm:"n2h2",act:"doble"}}];
+function loadExample(i){const e=EXAMPLES[i],o=e.o,M=matById(o.mat||BASE.mat);let v=Object.assign({},BASE);
+ v.mat=o.mat||BASE.mat;v.proc=o.proc||"prensa";const gg=o.geo||v.geo;v.geo=gg;Object.assign(v,GEOS[gg].def);
+ v.d1=M.d;v.m1=M.mo;v.y1=100;v.y2=0;v.y3=0;Object.assign(v,procDefaults(v.proc,M));v.herr=PHERR[v.proc];v.tEq=PTEQ[v.proc];
+ Object.assign(v,o);return v;}
+</script>
+<script>
+"use strict";
+/* ================= UTILIDADES DE DIBUJO ================= */
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function prep(cv,h){const dpr=Math.min(2,window.devicePixelRatio||1),w=cv.clientWidth||cv.parentElement.clientWidth||400;const hh=h||cv.clientHeight||250;cv.width=Math.round(w*dpr);cv.height=Math.round(hh*dpr);const c=cv.getContext("2d");c.setTransform(dpr,0,0,dpr,0,0);return {c,w,h:hh};}
+const CM={viridis:[[68,1,84],[59,82,139],[33,145,140],[94,201,98],[253,231,37]],inferno:[[0,0,4],[87,16,110],[188,55,84],[249,142,9],[252,255,164]],cool:[[44,123,182],[171,217,233],[255,255,191],[253,174,97],[215,25,28]],blues:[[240,249,255],[158,202,225],[66,146,198],[8,81,156],[8,48,107]],earth:[[30,40,60],[70,110,140],[150,170,140],[220,190,110],[250,240,200]]};
+const LUT={};
+function mkLUT(n){const S=CM[n],o=[];for(let i=0;i<256;i++){const p=i/255*(S.length-1),j=Math.min(S.length-2,Math.floor(p)),f=p-j,a=S[j],b=S[j+1];o.push(`rgb(${(a[0]+(b[0]-a[0])*f)|0},${(a[1]+(b[1]-a[1])*f)|0},${(a[2]+(b[2]-a[2])*f)|0})`);}LUT[n]=o;}
+Object.keys(CM).forEach(mkLUT);
+const cmc=(n,t)=>LUT[n][Math.round(clamp(isFinite(t)?t:0,0,1)*255)];
+function chart(cv,o){
+ const {c,w,h}=prep(cv),m={l:48,r:o.y2?48:14,t:o.title?26:12,b:o.xl?38:26},pw=w-m.l-m.r,ph=h-m.t-m.b;
+ const ink=css("--ink"),ink2=css("--ink-2"),line=css("--line");
+ c.clearRect(0,0,w,h);c.font="11px system-ui,sans-serif";
+ const log=!!o.logx,tx=v=>log?Math.log10(v):v;
+ let x0=o.xmin!==undefined?o.xmin:1e30,x1=o.xmax!==undefined?o.xmax:-1e30,y0=o.ymin!==undefined?o.ymin:1e30,y1=o.ymax!==undefined?o.ymax:-1e30,z0=1e30,z1=-1e30;
+ o.s.forEach(s=>{s.x.forEach((xv,i)=>{const yv=s.y[i];if(yv==null||!isFinite(yv)) return;if(o.xmin===undefined) x0=Math.min(x0,xv);if(o.xmax===undefined) x1=Math.max(x1,xv);if(s.ax===2){z0=Math.min(z0,yv);z1=Math.max(z1,yv);}else{if(o.ymin===undefined) y0=Math.min(y0,yv);if(o.ymax===undefined) y1=Math.max(y1,yv);}});});
+ if(!isFinite(x0)||x0>=x1){x0=0;x1=1;}if(!isFinite(y0)||y0>=y1){y0=0;y1=1;}
+ const pad=(a,b,lo,hi)=>[lo===undefined?a-(b-a)*0.05:a,hi===undefined?b+(b-a)*0.08:b];[y0,y1]=pad(y0,y1,o.ymin,o.ymax);
+ if(o.y2){if(o.y2min!==undefined) z0=o.y2min;if(o.y2max!==undefined) z1=o.y2max;if(!isFinite(z0)||z0>=z1){z0=0;z1=1;}[z0,z1]=pad(z0,z1,o.y2min,o.y2max);}
+ const X=v=>m.l+(tx(v)-tx(x0))/(tx(x1)-tx(x0))*pw,Y=v=>m.t+ph-(v-y0)/(y1-y0)*ph,Z=v=>m.t+ph-(v-z0)/(z1-z0)*ph;
+ c.strokeStyle=line;c.lineWidth=1;c.fillStyle=ink2;c.textAlign="right";
+ for(let i=0;i<=4;i++){const v=y0+(y1-y0)*i/4,yy=Y(v);c.beginPath();c.moveTo(m.l,yy);c.lineTo(m.l+pw,yy);c.stroke();c.fillText(fmt(v,o.yd!==undefined?o.yd:Math.abs(y1-y0)<2?2:Math.abs(y1-y0)<20?1:0),m.l-5,yy+4);}
+ if(o.y2){c.textAlign="left";for(let i=0;i<=4;i++){const v=z0+(z1-z0)*i/4;c.fillText(fmt(v,Math.abs(z1-z0)<2?2:Math.abs(z1-z0)<20?1:0),m.l+pw+5,Z(v)+4);}}
+ c.textAlign="center";
+ if(log){const a=Math.ceil(Math.log10(x0)),b=Math.floor(Math.log10(x1));for(let e=a;e<=b;e++){const v=Math.pow(10,e);c.beginPath();c.moveTo(X(v),m.t);c.lineTo(X(v),m.t+ph);c.stroke();c.fillText(fmt(v,0),X(v),m.t+ph+14);}}
+ else for(let i=0;i<=4;i++){const v=x0+(x1-x0)*i/4;c.fillText(fmt(v,Math.abs(x1-x0)<3?2:Math.abs(x1-x0)<30?1:0),X(v),m.t+ph+14);}
+ c.strokeStyle=ink2;c.strokeRect(m.l,m.t,pw,ph);
+ if(o.fill){c.save();c.beginPath();c.rect(m.l,m.t,pw,ph);c.clip();o.fill.forEach(f=>{c.fillStyle=f.c;const ya=Y(f.y0),yb=Y(f.y1);c.fillRect(m.l,Math.min(ya,yb),pw,Math.abs(yb-ya));});c.restore();}
+ c.save();c.beginPath();c.rect(m.l,m.t-2,pw,ph+4);c.clip();
+ o.s.forEach(s=>{c.strokeStyle=s.c;c.lineWidth=s.w||2;c.setLineDash(s.dash||[]);c.beginPath();let st=false;s.x.forEach((xv,i)=>{const yv=s.y[i];if(yv==null||!isFinite(yv)){st=false;return;}const px=X(xv),py=s.ax===2?Z(yv):Y(yv);if(!st){c.moveTo(px,py);st=true;}else c.lineTo(px,py);});c.stroke();});
+ c.setLineDash([]);c.restore();
+ (o.vl||[]).forEach(l=>{if(l.x<x0||l.x>x1) return;c.strokeStyle=l.c||css("--accent");c.lineWidth=1.3;c.setLineDash([5,3]);c.beginPath();c.moveTo(X(l.x),m.t);c.lineTo(X(l.x),m.t+ph);c.stroke();c.setLineDash([]);if(l.t){c.fillStyle=l.c||css("--accent");c.textAlign=X(l.x)>m.l+pw*0.7?"right":"left";c.fillText(l.t,X(l.x)+(X(l.x)>m.l+pw*0.7?-4:4),m.t+11);}});
+ (o.hl||[]).forEach(l=>{c.strokeStyle=l.c||css("--accent");c.lineWidth=1.3;c.setLineDash([5,3]);const yy=l.ax===2?Z(l.y):Y(l.y);c.beginPath();c.moveTo(m.l,yy);c.lineTo(m.l+pw,yy);c.stroke();c.setLineDash([]);if(l.t){c.fillStyle=l.c||css("--accent");c.textAlign="left";c.fillText(l.t,m.l+4,yy-4);}});
+ (o.pts||[]).forEach(p=>{const px=X(p.x),py=p.ax===2?Z(p.y):Y(p.y);c.fillStyle=p.c||css("--accent");c.beginPath();c.arc(px,py,5,0,7);c.fill();c.strokeStyle="#fff";c.lineWidth=1.5;c.stroke();});
+ if(o.title){c.fillStyle=ink;c.font="600 12px system-ui,sans-serif";c.textAlign="left";c.fillText(o.title,m.l,15);}
+ c.font="11px system-ui,sans-serif";c.fillStyle=ink2;c.textAlign="center";if(o.xl) c.fillText(o.xl,m.l+pw/2,h-4);
+ if(o.yl){c.save();c.translate(11,m.t+ph/2);c.rotate(-Math.PI/2);c.fillText(o.yl,0,0);c.restore();}
+ if(o.y2l){c.save();c.translate(w-8,m.t+ph/2);c.rotate(Math.PI/2);c.fillText(o.y2l,0,0);c.restore();}
+ if(o.leg){let lx=m.l+8,ly=m.t+h*0.06+8;c.textAlign="left";o.s.forEach(s=>{if(!s.n) return;c.strokeStyle=s.c;c.lineWidth=2.5;c.setLineDash(s.dash||[]);c.beginPath();c.moveTo(lx,ly);c.lineTo(lx+16,ly);c.stroke();c.setLineDash([]);c.fillStyle=ink;c.fillText(s.n,lx+20,ly+4);ly+=14;});}}
+
+/* ================= CAMPOS ================= */
+const FIELDS={sigma:{n:"Esfuerzo axial σz",u:"MPa",cm:"cool"},dens:{n:"Densidad relativa",u:"",cm:"viridis"},temp:{n:"Temperatura",u:"°C",cm:"inferno"},neck:{n:"Razón de cuello X/a",u:"",cm:"blues"},grain:{n:"Tamaño de grano",u:"µm",cm:"earth"},hv:{n:"Dureza",u:"HV",cm:"viridis"},binder:{n:"Ligante remanente",u:"",cm:"blues"},melt:{n:"Temperatura del fundido",u:"°C",cm:"inferno"}};
+function fieldKey(R,fr,sel){if(sel&&sel!=="auto") return sel;const st=fr.st;if(st==="press"||st==="eject") return "sigma";if(st==="inject") return "melt";if(st==="debind") return "binder";return "temp";}
+function computeRanges(R){
+ const G=R.G,rg={};const keys=["sigma","dens","temp","neck","grain","hv","binder","melt"];keys.forEach(k=>rg[k]=[1e30,-1e30]);
+ const up=(k,r)=>{rg[k][0]=Math.min(rg[k][0],r[0]);rg[k][1]=Math.max(rg[k][1],r[1]);};
+ R.frames.forEach(f=>{if(f.st==="inject"){const vv=[];for(let k=0;k<G.N;k++) if(G.mask[k]&&isFinite(f.b[k])) vv.push(f.b[k]);if(vv.length) up("melt",[Math.min(...vv),Math.max(...vv)]);return;}
+  if(f.st==="debind"){up("binder",[0,1]);return;}
+  up("sigma",frange(G,f.sig));if(f.st!=="press"&&f.st!=="eject") up("temp",frange(G,f.T));up("dens",frange(G,f.D));if(f.st!=="press"&&f.st!=="eject"){up("neck",frange(G,f.x));up("grain",frange(G,f.g));}});
+ up("hv",R.fin.hvR);rg.sigma[0]=0;rg.dens[1]=Math.max(rg.dens[1],rg.dens[0]+0.02);rg.neck[0]=0;rg.neck[1]=Math.max(rg.neck[1],0.3);rg.binder=[0,1];rg.temp[0]=Math.min(rg.temp[0],20);
+ keys.forEach(k=>{if(!isFinite(rg[k][0])) rg[k]=[0,1];if(rg[k][1]-rg[k][0]<1e-6) rg[k][1]=rg[k][0]+1;});
+ rg.melt=[+R.v.Tmold,+R.v.Tinj||180];rg.dens[0]=Math.max(0,rg.dens[0]-0.01);
+ R.rg=rg;return rg;}
+function fieldArr(R,fr,key){switch(key){case "sigma":return fr.sig;case "dens":return fr.D;case "temp":return fr.T;case "neck":return fr.x;case "grain":return fr.g;case "binder":return fr.b||fr.T;case "melt":return fr.b||fr.T;case "hv":{const a=new Float32Array(R.G.N);for(let k=0;k<R.G.N;k++) if(R.G.mask[k]){const p=propsAt(R.M,fr.D[k],fr.x[k],Math.max(fr.g[k],0.3));a[k]=fr.st==="sinter"||fr.st==="hp"||fr.st==="sps"||fr.st==="hip"?p.hv:0;}return a;}}return fr.T;}
+function drawCbar(cv,R,key){const f=FIELDS[key],rg=R.rg[key],{c,w,h}=prep(cv,14);for(let i=0;i<w;i++){c.fillStyle=cmc(f.cm,i/w);c.fillRect(i,0,1,h);}}
+function cbarLabels(R,key){const f=FIELDS[key],rg=R.rg[key],d=key==="dens"||key==="neck"||key==="binder"?2:key==="grain"?1:0;return {a:fmt(rg[0],d),b:fmt(rg[1],d),n:f.n+(f.u?" ("+f.u+")":"")};}
+
+/* ================= ESCENA PRINCIPAL ================= */
+function sceneBox(R,w,h,fr){
+ const G=R.G,mx=Math.max(...R.frames.map(f=>f.s?Math.max(f.s[0],f.s[1]):1)),sxm=Math.max(...R.frames.map(f=>f.s?f.s[0]:1)),szm=Math.max(...R.frames.map(f=>f.s?f.s[1]:1));
+ const mm=Math.max(G.W,G.H),padX=0.34*G.W+0.03*mm,padT=0.3*G.H+0.04*mm,padB=0.24*G.H+0.04*mm;
+ const totW=G.W*sxm+2*padX,totH=G.H*szm+padT+padB;
+ const sc=Math.min((w-30)/totW,(h-50)/totH);
+ return {sc,cx:w/2,yb:h-25-padB*sc};}
+function drawSim(cv,R,fi,opt){
+ const {c,w,h}=prep(cv,cv.clientHeight||400),G=R.G,fr=R.frames[clamp(Math.round(fi),0,R.frames.length-1)],v=R.v;
+ const bg=css("--surface-2"),ink=css("--ink"),ink2=css("--ink-2");
+ c.fillStyle=bg;c.fillRect(0,0,w,h);
+ const sb=sceneBox(R,w,h,fr),sc=sb.sc,sx=fr.s?fr.s[0]:1,sz=fr.s?fr.s[1]:1;
+ const X=x=>sb.cx+x*sx*sc,Z=z=>sb.yb-z*sz*sc;
+ const key=fieldKey(R,fr,opt.field),F=FIELDS[key],rg=R.rg[key],arr=fieldArr(R,fr,key);
+ const {nx,nz,dx,dz,mask}=G,isSim=fr.st!=="press"&&fr.st!=="eject"&&fr.st!=="inject"&&fr.st!=="debind";
+ const proc=v.proc,st=fr.st;
+ /* herramental */
+ const dcol="#59656F",gcol="#3A3F44",ecol="#C6B27A";
+ const topOf=i=>G.top[i]>=0?(G.top[i]+1)*dz:-1,botOf=i=>G.bot[i]>=0?G.bot[i]*dz:-1;
+ const W2=G.W/2;
+ let gap0=0;if(st==="press"&&R.frames[0]){const dapp=R.B.Dapp,dg=R.Dgavg;gap0=(dg/dapp-1)*(1-fr.prog);}
+ /* fondo de herramientas por proceso */
+ const partPath=()=>{ // contorno de la pieza
+  c.beginPath();for(let j=0;j<nz;j++)for(let i=0;i<nx;i++){const k=j*nx+i;if(!mask[k]) continue;const x0=X(-W2+i*dx),x1=X(-W2+(i+1)*dx),y0=Z(j*dz),y1=Z((j+1)*dz);
+   if(i===0||!mask[k-1]){c.moveTo(x0,y0);c.lineTo(x0,y1);}if(i===nx-1||!mask[k+1]){c.moveTo(x1,y0);c.lineTo(x1,y1);}
+   if(j===0||!mask[k-nx]){c.moveTo(x0,y0);c.lineTo(x1,y0);}if(j===nz-1||!mask[k+nx]){c.moveTo(x0,y1);c.lineTo(x1,y1);}}};
+ const arrow=(x0,y0,x1,y1,col,lw)=>{c.strokeStyle=col;c.fillStyle=col;c.lineWidth=lw||1.6;c.beginPath();c.moveTo(x0,y0);c.lineTo(x1,y1);c.stroke();const a=Math.atan2(y1-y0,x1-x0),s=5;c.beginPath();c.moveTo(x1,y1);c.lineTo(x1-s*Math.cos(a-0.45),y1-s*Math.sin(a-0.45));c.lineTo(x1-s*Math.cos(a+0.45),y1-s*Math.sin(a+0.45));c.closePath();c.fill();};
+ const Wpx=G.W*sx*sc,Hpx=G.H*sz*sc,L=sb.cx-Wpx/2,Rr=sb.cx+Wpx/2,yb=sb.yb,yt=sb.yb-Hpx;
+ let lab="";
+ if(proc==="prensa"&&(st==="press"||st==="eject")){
+  c.fillStyle=dcol;const t0=0.3*Wpx+4;c.fillRect(L-t0,yt-0.25*Hpx-gap0*Hpx-4,t0-1.5,Hpx*1.25+gap0*Hpx+10);c.fillRect(Rr+1.5,yt-0.25*Hpx-gap0*Hpx-4,t0-1.5,Hpx*1.25+gap0*Hpx+10);
+  // polvo suelto y punzón superior
+  for(let i=0;i<nx;i++){const tj=G.top[i];if(tj<0) continue;const xa=X(-W2+i*dx),xb=X(-W2+(i+1)*dx),yTop=Z((tj+1)*dz),gp=gap0*(G.Hc[tj*nx+i])*sz*sc;
+   if(gp>0.5){c.fillStyle="rgba(200,170,110,.35)";c.fillRect(xa,yTop-gp,xb-xa+0.5,gp);}
+   c.fillStyle="#7C8A96";c.fillRect(xa,yTop-gp-0.26*Hpx,xb-xa+0.5,0.26*Hpx);}
+  for(let i=0;i<nx;i++){const bj=G.bot[i];if(bj<0) continue;const xa=X(-W2+i*dx),xb=X(-W2+(i+1)*dx),yB=Z(bj*dz);c.fillStyle="#7C8A96";c.fillRect(xa,yB,xb-xa+0.5,0.2*Hpx);}
+  // núcleo
+  for(let i=0;i<nx;i++){let has=false;for(let j=0;j<nz;j++) if(mask[j*nx+i]) has=true;if(has) continue;const xa=X(-W2+i*dx),xb=X(-W2+(i+1)*dx);if(Math.abs(-W2+(i+0.5)*dx)<W2*0.98){c.fillStyle="#9A8F7A";c.fillRect(xa,yt-0.28*Hpx-gap0*Hpx,xb-xa+0.5,Hpx*1.48+gap0*Hpx);}}
+  lab="Matriz rígida, punzones y varilla de núcleo";
+ }else if(proc==="cip"&&(st==="press"||st==="eject")){lab="Molde elastomérico dentro del fluido a presión";}
+ else if((proc==="hp"||proc==="sps")&&isSim){c.fillStyle=gcol;const t0=0.3*Wpx+4;c.fillRect(L-t0,yt-0.35*Hpx,t0-1.5,Hpx*1.35+6);c.fillRect(Rr+1.5,yt-0.35*Hpx,t0-1.5,Hpx*1.35+6);c.fillRect(L-2,yt-0.35*Hpx,Wpx+4,0.35*Hpx-1);c.fillRect(L-2,yb+1,Wpx+4,0.22*Hpx);
+  lab=proc==="sps"?"Matriz y punzones de grafito con corriente pulsada":"Matriz y punzones de grafito calentados";}
+ else if(proc==="hip"&&isSim){c.strokeStyle="#6E8CA8";c.lineWidth=3;c.beginPath();c.roundRect(L-0.35*Wpx,yt-0.3*Hpx,Wpx*1.7,Hpx*1.6,12);c.stroke();lab="Recipiente con gas inerte a alta presión y horno interno";}
+ else if(proc==="mim"&&st==="inject"){c.fillStyle=dcol;const t0=0.3*Wpx+4;c.fillRect(L-t0,yt-0.3*Hpx,t0-2.5,Hpx*1.45+6);c.fillRect(Rr+2.5,yt-0.3*Hpx,t0-2.5,Hpx*1.45+6);c.fillRect(L-2.5,yt-0.3*Hpx,Wpx+5,0.3*Hpx-2);c.fillRect(L-2.5,yb+2.5,Wpx+5,0.15*Hpx+4);lab="Molde de dos mitades; el ligante fundido entra por la boquilla";}
+ else if(st==="debind"){lab="Desligado: el ligante sale desde la superficie hacia el centro";}
+ else if(st==="sinter"){c.fillStyle="#B9A98A";c.fillRect(L-0.2*Wpx,yb+1,Wpx*1.4,5);lab="Horno de sinterizado con bandeja";}
+ c.strokeStyle="rgba(255,255,255,.35)";c.lineWidth=1;if(proc==="hp"||proc==="sps"){c.strokeRect(L-2,yt-0.35*Hpx,Wpx+4,0.35*Hpx-1);c.strokeRect(L-2,yb+1,Wpx+4,0.22*Hpx);}
+ if((proc==="hp"||proc==="sps")&&isSim){c.fillStyle=gcol;c.fillRect(L,yt,Wpx,Hpx);}
+ if(proc==="mim"&&st==="inject"){c.fillStyle=dcol;c.fillRect(L,yt,Wpx,Hpx);}
+ /* campo */
+ for(let j=0;j<nz;j++)for(let i=0;i<nx;i++){const k=j*nx+i;if(!mask[k]) continue;const val=arr[k];
+  const x0=X(-W2+i*dx),x1=X(-W2+(i+1)*dx),y0=Z(j*dz),y1=Z((j+1)*dz);
+  if(!isFinite(val)){c.fillStyle="rgba(120,130,140,.10)";c.fillRect(x0,y1,x1-x0+0.6,y0-y1+0.6);continue;}
+  c.fillStyle=cmc(F.cm,(val-rg[0])/(rg[1]-rg[0]));c.fillRect(x0,y1,x1-x0+0.6,y0-y1+0.6);}
+ partPath();c.strokeStyle=ink;c.lineWidth=1.6;c.stroke();
+ if(proc==="mim"&&st==="inject"&&R.gate>=0){const gk=R.gate,gi=gk%nx,gj=(gk-gi)/nx;c.fillStyle="#E7B34C";c.beginPath();c.arc(X(-W2+(gi+0.5)*dx),Z((gj+1)*dz)-2,4,0,7);c.fill();arrow(X(-W2+(gi+0.5)*dx),Z((gj+1)*dz)-0.3*Hpx,X(-W2+(gi+0.5)*dx),Z((gj+1)*dz)-5,"#E7B34C",3);}
+ /* vectores */
+ if(opt.vec){
+  const step=Math.max(2,Math.round(nx/14)),stz=Math.max(2,Math.round(nz/9));
+  for(let j=Math.floor(stz/2);j<nz;j+=stz)for(let i=Math.floor(step/2);i<nx;i+=step){const k=j*nx+i;if(!mask[k]) continue;
+   const px=X(-W2+(i+0.5)*dx),py=Z((j+0.5)*dz);
+   if(st==="press"||st==="eject"||(((proc==="hp"||proc==="sps"||proc==="hip")&&isSim)&&key==="sigma")||(proc==="cip"&&st==="press")){
+    const s=fr.sig[k]/Math.max(R.rg.sigma[1],1);if(s<0.04) continue;const Lh=Math.min(step*dx*sc*0.9,22);
+    if(proc==="cip"||proc==="hip"){arrow(px-Lh*0.45*s-2,py,px+0.001,py,"#1F5FBF",1.3);arrow(px+Lh*0.45*s+2,py,px-0.001,py,"#1F5FBF",1.3);}
+    else{arrow(px,py-Lh*0.45*s-2*0,px,py+Lh*0.45*s,"#1F5FBF",1.6);const Kr=0.25+0.45*0.85;arrow(px,py,px+(i<nx/2?-1:1)*Lh*0.3*s*Kr*1.5,py,"#0F8F6F",1.2);}}
+   else if(isSim&&st!=="inject"){ // flujo de calor -k grad T
+    const T=fr.T,Tl=mask[k-1]?T[k-1]:T[k],Tr=mask[k+1]?T[k+1]:T[k],Td=mask[k-nx]?T[k-nx]:T[k],Tu=mask[k+nx]?T[k+nx]:T[k];
+    const gx=(Tr-Tl)/(2*dx),gz=(Tu-Td)/(2*dx),mg=Math.hypot(gx,gz);if(mg<0.4) continue;const q=Math.min(1,mg/R.gmax),Lh=6+Math.min(step*dx*sc*0.7,20)*q;
+    {const ux=-gx/mg,uy=gz/mg;arrow(px-ux*Lh*0.5,py-uy*Lh*0.5,px+ux*Lh*0.5,py+uy*Lh*0.5,"#F5A524",1.6);}}}
+  if(st==="press"||(st==="eject")){const f=st==="press"?1:(1-(fr.P/ R.v.P));for(let j=2;j<nz-1;j+=Math.max(3,Math.round(nz/6))){const k=j*nx;let i0=-1,i1=-1;for(let i=0;i<nx;i++) if(mask[j*nx+i]){if(i0<0) i0=i;i1=i;}if(i0<0) continue;if(R.mu>0){arrow(X(-W2+i0*dx)+3,Z((j+0.5)*dz)+9,X(-W2+i0*dx)+3,Z((j+0.5)*dz)-2,"#D0312D",1.2);arrow(X(-W2+(i1+1)*dx)-3,Z((j+0.5)*dz)+9,X(-W2+(i1+1)*dx)-3,Z((j+0.5)*dz)-2,"#D0312D",1.2);}}}
+ }
+ /* rótulos */
+ c.fillStyle=ink2;c.font="12px system-ui,sans-serif";c.textAlign="center";c.fillText(lab,w/2,18);
+ c.textAlign="left";c.fillStyle=ink;c.font="600 12px system-ui,sans-serif";
+ if(isSim&&proc!=="cip"&&st!=="debind"){c.fillText(`T control ${fmt(fr.Tc,0)} °C`+(fr.P>0?` · P ${fmt(fr.P,0)} MPa`:""),12,h-8);}
+ else if(st==="press"||st==="eject") c.fillText(`P ${fmt(fr.P,0)} MPa`,12,h-8);
+ else if(st==="inject") c.fillText(`Llenado ${fmt(fr.prog*100,0)} %`,12,h-8);
+ else if(st==="debind") c.fillText(`Desligado ${fmt((1-wavgB(R,fr))*100,0)} % del ligante`,12,h-8);
+ if(opt.probe&&opt.probe.k>=0&&mask[opt.probe.k]){const k=opt.probe.k,i=k%nx,j=(k-i)/nx,px=X(-W2+(i+0.5)*dx),py=Z((j+0.5)*dz);c.strokeStyle="#fff";c.lineWidth=3;c.beginPath();c.arc(px,py,7,0,7);c.stroke();c.strokeStyle="#D0312D";c.lineWidth=1.6;c.beginPath();c.arc(px,py,7,0,7);c.stroke();}
+ cv._geo={sb,sx,sz,G,X0:sb.cx,W2};
+ return {fr,key};}
+function B0(R){return R.B.Dapp;}
+function wavgB(R,fr){let s=0;for(let k=0;k<R.G.N;k++) if(R.G.mask[k]) s+=(isFinite(fr.b[k])?fr.b[k]:0)*R.G.wgt[k];return s/R.G.wsum;}
+function pickCell(cv,R,ev){const r=cv.getBoundingClientRect(),x=(ev.clientX-r.left),y=(ev.clientY-r.top),g=cv._geo;if(!g) return -1;
+ const G=g.G,sc=g.sb.sc,xx=(x-g.sb.cx)/(g.sx*sc),zz=(g.sb.yb-y)/(g.sz*sc);const i=Math.floor((xx+G.W/2)/G.dx),j=Math.floor(zz/G.dz);
+ if(i<0||j<0||i>=G.nx||j>=G.nz) return -1;const k=j*G.nx+i;return G.mask[k]?k:-1;}
+</script>
+<script>
+"use strict";
+/* ================= MICROESTRUCTURA LOCAL ================= */
+function drawMicro(cv,x,D,Dg,gr){
+ const c=cv.getContext("2d"),w=cv.width=200,h=cv.height=200;
+ c.fillStyle="#10161D";c.fillRect(0,0,w,h);
+ const r=15,prog=clamp((D-0.55)/0.45,0,1),sp=2*r*(1-0.32*prog),col="#8EA3B5";
+ const dense=D>0.93;
+ if(dense){c.fillStyle=col;c.fillRect(0,0,w,h);const gs=clamp(gr||1,1,2.6),hs=sp*0.62*gs;c.strokeStyle="#55677A";c.lineWidth=1.2;
+  const pr=clamp((1-D)*70,0,5);
+  for(let row=-1;row<h/(hs*1.5)+2;row++)for(let col2=-1;col2<w/(hs*1.732)+2;col2++){const cx=col2*hs*1.732+(row%2?hs*0.866:0),cy=row*hs*1.5;
+   c.beginPath();for(let q=0;q<6;q++){const a=Math.PI/3*q+Math.PI/6,px=cx+hs*Math.cos(a),py=cy+hs*Math.sin(a);q?c.lineTo(px,py):c.moveTo(px,py);}c.closePath();c.stroke();
+   if(pr>0.6){c.fillStyle="#10161D";const a=Math.PI/6;c.beginPath();c.arc(cx+hs*Math.cos(a),cy+hs*Math.sin(a),pr,0,7);c.fill();}}}
+ else{
+  const rows=Math.ceil(h/(sp*0.866))+2,cols=Math.ceil(w/sp)+2,pts=[];
+  for(let j=-1;j<rows;j++)for(let i=-1;i<cols;i++) pts.push([i*sp+(j%2?sp/2:0),j*sp*0.866]);
+  const xr=Math.max(0.8,clamp(x,0,1)*r);
+  c.strokeStyle=col;c.lineCap="butt";c.lineWidth=2*xr;
+  pts.forEach(([px,py])=>{[[sp,0],[sp/2,sp*0.866],[-sp/2,sp*0.866]].forEach(([dx,dy])=>{c.beginPath();c.moveTo(px,py);c.lineTo(px+dx,py+dy);c.stroke();});});
+  c.fillStyle=col;pts.forEach(([px,py])=>{c.beginPath();c.arc(px,py,r,0,7);c.fill();});
+  c.strokeStyle="#5A6B7A";c.lineWidth=1;pts.forEach(([px,py])=>{c.beginPath();c.arc(px,py,r,0,7);c.stroke();});}
+ c.fillStyle="rgba(255,255,255,.85)";c.font="11px system-ui,sans-serif";c.textAlign="left";c.fillText(`X/a = ${fmt(x,2)} · D = ${fmt(D*100,1)} %`,6,194);}
+/* ================= EMPAQUETAMIENTO 2D (RSA) ================= */
+function drawPacking(cv,B,seed){
+ const {c,w,h}=prep(cv,cv.clientHeight||230),cl=B.cl;let s=(seed||7)*9301+49297;const rnd=()=>{s=(s*9301+49297)%233280;return s/233280;};
+ c.fillStyle="#10161D";c.fillRect(0,0,w,h);
+ const dmax=Math.max(...cl.map(k=>k.d)),dmin=Math.min(...cl.map(k=>k.d)),cols=["#E7B34C","#5FB3C6","#D0736A"];
+ const rad=cl.map(k=>cl.length===1?9:3+11*Math.log(k.d/dmin+1e-9)/Math.log(dmax/dmin+1e-9)*(1)+ (k.d===dmin?0:0));
+ const circ=[],cell=4,gw=Math.ceil(w/cell),gh=Math.ceil(h/cell),grid=new Array(gw*gh);
+ const area=w*h,target=Math.min(0.86,B.Dtap*1.02);
+ cl.forEach((k,idx)=>{const r=Math.max(1.6,rad[idx]),goal=area*target*k.y;let a=0,tries=0;
+  while(a<goal&&tries<14000){tries++;const x=r+rnd()*(w-2*r),y=r+rnd()*(h-2*r);let ok=true;
+   const gx=Math.floor(x/cell),gy=Math.floor(y/cell),R=Math.ceil((r+16)/cell);
+   for(let yy=Math.max(0,gy-R);yy<=Math.min(gh-1,gy+R)&&ok;yy++)for(let xx=Math.max(0,gx-R);xx<=Math.min(gw-1,gx+R)&&ok;xx++){const L=grid[yy*gw+xx];if(L) for(const q of L){const dx=q[0]-x,dy=q[1]-y,rr=q[2]+r;if(dx*dx+dy*dy<rr*rr){ok=false;break;}}}
+   if(ok){circ.push([x,y,r,idx]);const g2=(Math.floor(y/cell))*gw+Math.floor(x/cell);(grid[g2]=grid[g2]||[]).push([x,y,r]);a+=Math.PI*r*r;}}});
+ let A=0;circ.forEach(q=>{A+=Math.PI*q[2]*q[2];c.fillStyle=cols[q[3]%3];c.beginPath();c.arc(q[0],q[1],q[2],0,7);c.fill();});
+ return A/area;}
+/* ================= MORFOLOGÍAS (SVG) ================= */
+function morphSVG(k){
+ const f="#B7C4D0",s="#10161D";let b="";
+ switch(k){
+  case "esf":b=`<circle cx="50" cy="35" r="22" fill="${f}"/><circle cx="72" cy="22" r="6" fill="${f}"/><circle cx="26" cy="54" r="4" fill="${f}"/>`;break;
+  case "red":b=`<path d="M28 38c-4-16 12-26 28-22s24 16 18 28-26 18-38 10-6-10-8-16z" fill="${f}"/>`;break;
+  case "irr":b=`<path d="M24 50l6-24 18-12 20 6 10 18-6 18-22 10-14-4z" fill="${f}"/>`;break;
+  case "esp":b=`<path d="M24 44c-2-16 10-26 26-26s26 12 22 28-14 20-30 18-16-8-18-20z" fill="${f}"/><circle cx="42" cy="34" r="4" fill="${s}"/><circle cx="58" cy="44" r="5" fill="${s}"/><circle cx="46" cy="52" r="3" fill="${s}"/><circle cx="62" cy="28" r="3" fill="${s}"/>`;break;
+  case "den":b=`<path d="M50 62V26M50 50L34 38M50 44L66 32M50 34L40 22M50 28L60 18M34 38l-8-4M66 32l8-2" stroke="${f}" stroke-width="5" stroke-linecap="round" fill="none"/>`;break;
+  case "esc":b=`<ellipse cx="50" cy="36" rx="34" ry="8" transform="rotate(-18 50 36)" fill="${f}"/><ellipse cx="44" cy="48" rx="22" ry="5" transform="rotate(12 44 48)" fill="${f}" opacity=".7"/>`;break;
+  case "gra":b=`<circle cx="50" cy="35" r="26" fill="${f}" opacity=".35"/>`+[[40,26],[56,24],[46,38],[62,38],[38,46],[54,50],[30,36],[68,28],[48,28],[58,44]].map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="5" fill="${f}"/>`).join("");break;}
+ return `<svg viewBox="0 0 100 70">${b}</svg>`;}
+function geoIcon(k){return `<svg viewBox="0 0 56 34" aria-hidden="true">${GEOS[k].svg}</svg>`;}
+</script>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+function lsGet(k,d){try{const r=localStorage.getItem(k);return r?JSON.parse(r):d;}catch(e){return d;}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+function toast(msg){const t=$("toast");t.textContent=msg;t.classList.add("show");clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove("show"),2200);}
+/* variables extra del diccionario */
+Object.assign(V,{
+ rho:{n:"Densidad teórica",s:"ρ",u:"kg/m³",d:"Densidad del material completamente denso.",p:"Convierte la densidad relativa en absoluta y la masa de la pieza.",q:""},
+ Tm:{n:"Temperatura de fusión (solidus)",s:"T_m",u:"°C",d:"Temperatura a la que empieza a fundirse la aleación.",p:"El sinterizado en estado sólido se hace entre 0,6 y 0,9 T_m en kelvin.",q:""},
+ Ts:{n:"Temperatura típica de sinterizado",s:"T_s",u:"°C",d:"Temperatura industrial habitual para sinterizar este material.",p:"",q:""},
+ Py:{n:"Presión de fluencia de Heckel",s:"P_y",u:"MPa",d:"Inversa de la pendiente de la curva de Heckel: mide qué tan duro es el polvo al compactar.",p:"Mayor P_y exige más presión para el mismo nivel de densidad.",q:"",e:"P_y = 1/K"},
+ UTSm:{n:"Resistencia a la tracción (denso)",s:"σ_u",u:"MPa",d:"Resistencia del material completamente denso.",p:"",q:"La pieza porosa conserva solo una fracción."},
+ HVm:{n:"Dureza (denso)",s:"HV",u:"",d:"Dureza Vickers del material denso.",p:"",q:""},
+ Em:{n:"Módulo elástico (denso)",s:"E",u:"GPa",d:"Rigidez del material denso.",p:"Controla la recuperación elástica en la expulsión.",q:""},
+ km:{n:"Conductividad térmica (denso)",s:"k",u:"W/m·K",d:"Conductividad del material denso.",p:"Materiales poco conductores, como el titanio, generan mayores gradientes térmicos.",q:""},
+ Qs:{n:"Energía de activación de sinterizado",s:"Q",u:"kJ/mol",d:"Energía efectiva de los mecanismos de difusión que producen los cuellos.",p:"Mayor Q significa que hace falta más temperatura para sinterizar.",q:"",e:"rapidez ∝ exp(−Q/RT)"},
+ Tl:{n:"Formación de fase líquida",s:"T_L",u:"°C",d:"Temperatura por encima de la cual aparece líquido durante el sinterizado (eutéctico o aleación).",p:"El líquido acelera mucho la densificación, pero demasiado produce hundimiento.",q:""},
+ priceM:{n:"Precio del polvo",s:"",u:"COP/kg",d:"Precio de referencia del polvo típico del material.",p:"",q:"Varía mucho con el tamaño, la forma y la pureza."},
+ fi:{n:"Índice de congelamiento",s:"FI",u:"",d:"Relación entre el tiempo que tarda el frente en llegar a un punto y el tiempo que tarda en congelarse en esa sección.",p:"Mayor de 1 significa que el fundido se solidifica antes de llegar: llenado corto.",q:""},
+ tdeb:{n:"Tiempo de desligado",s:"t_d",u:"h",d:"Tiempo para remover el ligante hasta el centro de la sección más gruesa.",p:"Crece con el cuadrado del espesor.",q:"",e:"t ≈ s²/D_b"},
+ tfill:{n:"Tiempo de llenado",s:"t_f",u:"s",d:"Volumen de la cavidad dividido por el caudal de inyección.",p:"",q:""},
+ Pav:{n:"Presión media en la pieza",s:"P̄",u:"MPa",d:"Presión promedio que siente el polvo después de la fricción con la pared.",p:"",q:""},
+ shrh:{n:"Reducción de altura",s:"ΔH/H",u:"%",d:"En el prensado en caliente uniaxial la pieza se contrae casi solo en la dirección axial, porque la matriz impide el movimiento radial.",p:"",q:""}});
+/* ================= CAMPOS ================= */
+const num=(min,max,step)=>({t:"num",min,max,step});
+const FD={D:num(3,200,0.5),H:num(2,150,0.5),Di:num(0,150,0.5),D1:num(5,200,0.5),H1:num(1,100,0.5),D2:num(3,200,0.5),H2:num(1,100,0.5),Db:num(5,200,0.5),Dt:num(3,200,0.5),Wp:num(3,150,0.5),Ly:num(3,200,0.5),tb:num(1,50,0.5),
+ d1:num(0.5,300,0.5),y1:num(0,100,1),m1:{t:"sel",o:MO},d2:num(0.5,300,0.5),y2:num(0,100,1),m2:{t:"sel",o:MO},d3:num(0.2,300,0.5),y3:num(0,100,1),m3:{t:"sel",o:MO},sg:num(1.1,2.2,0.05),lub:num(0,2,0.05),
+ P:num(0,1000,1),act:{t:"sel",o:[["simple","Simple (solo punzón superior)"],["doble","Doble (dos punzones)"],["flot","Matriz flotante"]]},multi:{t:"chk"},T:num(200,3000,5),t:num(1,1200,1),hr:num(1,700,1),atm:{t:"sel",o:ATMS},fld:{t:"chk"},
+ hstate:{t:"sel",o:[["can","Polvo encapsulado (lata)"],["pres","Pieza presinterizada (poros cerrados)"]]},
+ load:num(45,72,0.5),binder:{t:"sel",o:Object.entries(BINDERS).map(([k,b])=>[k,b.n])},Tinj:num(120,260,1),Tmold:num(20,120,1),vinj:num(1,120,1),gate:{t:"sel",o:[["centro","Centro superior"],["borde","Borde superior"],["base","Centro de la base"]]},
+ lote:num(1,1e7,1),herr:num(0,1e9,100000),tEq:num(0,1e7,1000),tHorno:num(0,1e7,1000),tMO:num(0,1e7,1000),pE:num(0,10000,10)};
+const S={v:Object.assign({},BASE),ex:1,t:0,playing:false,R:null,runs:[],meta:{est:"",grupo:"",curso:"Procesos de manufactura",obs:""},probe:{k:-1},fld:"auto",vec:true,resetT:true,mats:[]};
+function loadEx(i){S.v=loadExample(i);S.ex=i;S.resetT=true;S.probe.k=-1;}
+/* ================= DIÁLOGO ================= */
+const ib=k=>`<button class="i" data-info="${k}" type="button" aria-label="Información: ${V[k]?V[k].n:k}">i</button>`;
+function curVal(k){const v=S.v,R=S.R,m=matById(v.mat);if(!R) return null;
+ if(k==="material") return m.name;if(k==="ejemplo") return S.ex!=null?EXAMPLES[S.ex].n:"Pieza personalizada";if(k==="geo") return GEOS[v.geo].name;if(k==="proceso") return PROCS[v.proc].name;
+ const o=(S.outs||[]).find(o=>o.k===k);if(o) return (typeof o.v==="number"?fmt(o.v,o.d):o.v)+" "+(o.u||"");
+ if(k in v){const d=FD[k];if(d&&d.t==="sel"){const q=d.o.find(q=>q[0]===v[k]);return q?q[1]:v[k];}if(d&&d.t==="chk") return v[k]?"Activado":"Desactivado";return fmt(+v[k],Number.isInteger(+v[k])?0:2)+" "+(V[k].u||"");}
+ const mm={rho:m.rho,Tm:m.Tm,Ts:m.Ts,Py:m.Py,UTSm:m.UTS,HVm:m.HV,Em:m.E,km:m.k,Qs:m.Qs,Tl:m.Tl,priceM:m.price};if(k in mm) return fmt(mm[k],0)+" "+(V[k].u||"");
+ if(R.C&&k in R.C) return money(R.C[k]);return null;}
+function openInfo(k,html0){const d=V[k];if(!d&&!html0) return;
+ $("dlgTitle").textContent=d?d.n:html0.t;$("dlgSym").textContent=d?[d.s,d.u?"["+d.u+"]":""].filter(Boolean).join("  "):"";
+ let html=html0?html0.b:"";if(d){const cv=curVal(k);if(cv!=null&&!k.startsWith("g_")) html+=`<div class="now"><b>Valor actual:</b> ${cv}</div>`;
+  html+=`<h4>¿Qué es?</h4><p>${d.d}</p>`;if(d.p) html+=`<h4>Efecto en el proceso</h4><p>${d.p}</p>`;if(d.q) html+=`<h4>Efecto en la pieza</h4><p>${d.q}</p>`;if(d.e) html+=`<h4>Ecuación</h4><span class="eq">${d.e}</span>`;}
+ $("dlgBody").innerHTML=html;const dl=$("info");dl.showModal?dl.showModal():dl.setAttribute("open","");}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-info]");if(b){e.preventDefault();openInfo(b.dataset.info);}});
+$("dlgClose").onclick=()=>$("info").close();$("info").addEventListener("click",e=>{if(e.target.id==="info") $("info").close();});
+/* ================= FORMULARIOS ================= */
+function field(k,pref){pref=pref||"in";const v=S.v,d=FD[k],I=V[k];let min=d.min,max=d.max,step=d.step;
+ if(k==="P"){const p=PROCS[v.proc].P;min=p.min;max=p.max;step=p.step;}
+ const lab=`<label for="${pref}_${k}">${I.n}${I.s?` <span class="sy">${I.s}</span>`:""} ${ib(k)}</label>`;
+ if(d.t==="sel") return `<div class="field wide">${lab}<div class="inwrap"><select id="${pref}_${k}" data-k="${k}">${d.o.map(o=>`<option value="${o[0]}" ${v[k]===o[0]?"selected":""}>${o[1]}</option>`).join("")}</select></div></div>`;
+ if(d.t==="chk") return `<div class="field chk"><input type="checkbox" id="${pref}_${k}" data-k="${k}" ${v[k]?"checked":""}>${lab}</div>`;
+ return `<div class="field">${lab}<div class="inwrap"><input type="number" inputmode="decimal" id="${pref}_${k}" data-k="${k}" value="${v[k]}" min="${min}" max="${max}" step="${step}"><span class="u">${I.u||""}</span></div></div>`;}
+function procKeys(v){const k=PROCS[v.proc].pk.slice();if(!["brida","cubo","cono","copa"].includes(v.geo)){const i=k.indexOf("multi");if(i>=0) k.splice(i,1);}return k;}
+function powHTML(pref){let h="";for(let i=1;i<=3;i++) h+=`<div class="frac"><h4>Fracción ${i}${i===1?" (más gruesa)":""}</h4>${field("d"+i,pref)}${field("y"+i,pref)}${field("m"+i,pref)}</div>`;
+ h+=field("sg",pref);if(S.v.proc==="prensa") h+=field("lub",pref);return h;}
+function renderPowderInputs(){$("inPow").innerHTML=powHTML("in");const e=$("inPow2");if(e) e.innerHTML=powHTML("in2");bindInputs($("inPow"));if(e) bindInputs(e);}
+function renderForms(){const v=S.v;
+ $("inGeo").innerHTML=GEOS[v.geo].in.map(k=>field(k)).join("");
+ $("procTitle").textContent=PROCS[v.proc].short;
+ $("inProc").innerHTML=procKeys(v).map(k=>field(k)).join("")+`<button class="btn sm" id="recBtn" type="button">Aplicar valores típicos del material</button>`;
+ $("inTh").innerHTML=["T","t","hr","atm"].map(k=>field(k)).join("");
+ $("inCost").innerHTML=["lote","herr","tEq","tHorno","tMO","pE"].map(k=>field(k)).join("");
+ renderPowderInputs();["inGeo","inProc","inTh","inCost"].forEach(id=>bindInputs($(id)));
+ $("recBtn").onclick=()=>{const M=matById(S.v.mat);Object.assign(S.v,procDefaults(S.v.proc,M));S.ex=null;renderEx();renderForms();compute(true);toast("Valores típicos aplicados");};}
+function bindInputs(root){root.querySelectorAll("[data-k]").forEach(el=>el.addEventListener(el.type==="number"?"input":"change",()=>onInput(el)));}
+function syncInputs(skip){document.querySelectorAll("[data-k]").forEach(el=>{if(el===skip) return;const k=el.dataset.k;if(!(k in S.v)) return;if(el.type==="checkbox") el.checked=!!S.v[k];else if(document.activeElement!==el) el.value=S.v[k];});}
+function onInput(el){const k=el.dataset.k,d=FD[k];let val;
+ if(d.t==="chk") val=el.checked;else if(d.t==="sel") val=el.value;
+ else{val=parseFloat(el.value);let min=d.min,max=d.max;if(k==="P"){min=PROCS[S.v.proc].P.min;max=PROCS[S.v.proc].P.max;}const bad=!isFinite(val)||val<min||val>max;el.parentElement.style.borderColor=bad?"var(--bad)":"";el.title=bad?`Valor válido entre ${min} y ${max}`:"";if(bad) return;}
+ S.v[k]=val;S.ex=null;renderEx();syncInputs(el);if(k==="y1"||k==="y2"||k==="y3"||/^[dm][123]$/.test(k)||k==="sg") S.powChanged=true;compute();}
+function renderProc(){$("procbar").innerHTML=Object.entries(PROCS).map(([k,p])=>`<button class="procbtn" data-proc="${k}" aria-pressed="${k===S.v.proc}">${p.icon}<span><b>${p.short}</b><span>${p.sub}</span></span></button>`).join("");
+ $("procbar").querySelectorAll(".procbtn").forEach(b=>b.onclick=()=>{setProc(b.dataset.proc);});}
+function setProc(p){const v=S.v,M=matById(v.mat);v.proc=p;Object.assign(v,procDefaults(p,M));v.herr=PHERR[p];v.tEq=PTEQ[p];if(p==="mim"&&v.geo==="pastilla") v.geo="pastilla";S.ex=null;S.resetT=true;S.probe.k=-1;renderAll();}
+function renderGeo(){$("geobar").innerHTML=Object.entries(GEOS).map(([k,g])=>`<button class="geobtn" data-geo="${k}" aria-pressed="${k===S.v.geo}">${geoIcon(k)}${g.name}</button>`).join("");
+ $("geobar").querySelectorAll(".geobtn").forEach(b=>b.onclick=()=>{S.v.geo=b.dataset.geo;Object.assign(S.v,GEOS[S.v.geo].def);S.ex=null;S.resetT=true;S.probe.k=-1;renderAll();});}
+function renderEx(){$("exChips").innerHTML=EXAMPLES.map((e,i)=>`<button class="chip" data-ex="${i}" aria-pressed="${i===S.ex}">${e.n}</button>`).join("");
+ $("exDesc").textContent=S.ex!=null?EXAMPLES[S.ex].d:"Pieza personalizada: modificaste los valores del ejemplo.";
+ $("exChips").querySelectorAll(".chip").forEach(b=>b.onclick=()=>{loadEx(+b.dataset.ex);renderAll();});}
+function renderMat(){const v=S.v,m=matById(v.mat);$("matSel").innerHTML=MATS.map(x=>`<option value="${x.id}" ${x.id===v.mat?"selected":""}>${x.name}</option>`).join("");
+ const rows=[["rho",m.rho/1000,"g/cm³"],["Tm",m.Tm,"°C"],["Ts",m.Ts,"°C"],["Py",m.Py,"MPa"],["UTSm",m.UTS,"MPa"],["HVm",m.HV,""],["Em",m.E,"GPa"],["km",m.k,"W/m·K"],["Qs",m.Qs,"kJ/mol"],["Tl",m.Tl?m.Tl:"—",m.Tl?"°C":""],["priceM",m.price,"COP/kg"]];
+ $("matProps").innerHTML=rows.map(([k,val,u])=>`<div><span>${V[k].s||V[k].n} ${ib(k)}</span><span>${typeof val==="number"?fmt(val,val<20?2:0):val} ${u}</span></div>`).join("");}
+$("matSel").onchange=e=>{const M=matById(e.target.value),v=S.v;v.mat=M.id;v.d1=M.d;v.m1=M.mo;Object.assign(v,procDefaults(v.proc,M));S.ex=null;S.resetT=true;renderAll();};
+function renderAll(){renderProc();renderGeo();renderEx();renderMat();renderForms();compute(true);}
+/* ================= CÁLCULO ================= */
+let cTimer=null;
+function compute(now){clearTimeout(cTimer);const go=()=>{try{S.R=evaluate(S.v);}catch(e){console.error(e);toast("Error de cálculo: "+e.message);return;}
+  const R=S.R;computeRanges(R);R.gmax=calcGmax(R);
+  if(S.resetT){S.t=defaultT(R);S.resetT=false;$("prog").value=Math.round(S.t*1000);}
+  renderSelField();renderResults();renderCosts();drawCharts();drawFrame();if(S.powChanged&&$("tab-pol").classList.contains("active")) renderPowder();S.powChanged=false;};
+ if(now) go();else cTimer=setTimeout(go,110);}
+function defaultT(R){const N=R.frames.length-1,s=R.stages,v=R.v;let i;if(v.proc==="prensa"||v.proc==="cip") i=s[0].i1;else if(v.proc==="mim") i=Math.round(s[0].i1*0.6);else i=Math.round(N*0.4);return clamp(i/N,0,1);}
+function calcGmax(R){const G=R.G,{nx,nz,mask,dx}=G;let mg=0.5;
+ R.frames.forEach((f,ix)=>{if(ix%3||f.st==="press"||f.st==="eject"||f.st==="inject"||f.st==="debind") return;const T=f.T;
+  for(let k=nx+1;k<nx*(nz-1)-1;k++){if(!mask[k]||!mask[k-1]||!mask[k+1]||!mask[k-nx]||!mask[k+nx]) continue;const gx=(T[k+1]-T[k-1])/(2*dx),gz=(T[k+nx]-T[k-nx])/(2*dx),g=Math.hypot(gx,gz);if(g>mg) mg=g;}});return mg;}
+function fieldList(R){const a=[["auto","Automático según la etapa"],["sigma","Esfuerzo axial σz"],["dens","Densidad relativa"],["temp","Temperatura"],["neck","Razón de cuello X/a"],["grain","Tamaño de grano"],["hv","Dureza final (HV)"]];if(R.v.proc==="mim"){a.push(["melt","Temperatura del fundido"]);a.push(["binder","Ligante remanente"]);}return a;}
+function renderSelField(){const R=S.R,l=fieldList(R),s=$("fldSel");if(!l.find(a=>a[0]===S.fld)) S.fld="auto";s.innerHTML=l.map(a=>`<option value="${a[0]}" ${a[0]===S.fld?"selected":""}>${a[1]}</option>`).join("");}
+$("fldSel").onchange=e=>{S.fld=e.target.value;drawFrame();};$("vecSel").onchange=e=>{S.vec=e.target.checked;drawFrame();};
+/* ================= RESULTADOS ================= */
+function outputs(R){
+ const v=R.v,B=R.B,M=R.M,f=R.fin,G=R.G,O=[],g=t=>O.push([t]),o=(k,val,u,d,st,lab)=>O.push({k,v:val,u,d,st,lab});const p=v.proc;
+ g("Polvo");o("dapp",B.Dapp*100,"%",1);o("dtap",B.Dtap*100,"%",1);o("haus",B.HR,"",2,B.HR>1.4?"warn":"ok");
+ o("hall",isFinite(B.tH)?B.tH:"No fluye",isFinite(B.tH)?"s/50 g":"",1,isFinite(B.tH)?"ok":"warn");o("d32",B.d32,"µm",1);o("d50",B.d50,"µm",1);o("sv",6/((M.rho/1000)*B.dEff),"m²/g",2);
+ if(p==="prensa"||p==="cip"){g("Compactación");o("Dg",R.Dgavg*100,"%",1);const dd=(R.DgR[1]-R.DgR[0])*100;o("Dgrad",dd,"pp",1,dd>5?"bad":dd>3?"warn":"ok");
+  const F=v.P*G.area/9806.65;o("ftn",F,"t",1);o("prensaRec",recPress(F),"t",0);o("cr",R.Dgavg/B.Dapp,"",2);
+  if(p==="prensa"){const fe=0.6*R.mu*1.2*R.Kr*R.Pavg*G.side/1000;o("fe",fe,"kN",1);o("sb",R.sb,"%",2,R.sb>0.6?"bad":R.sb>0.4?"warn":"ok");o("sgr",R.sgr||0,"MPa",1,(R.sgr||0)<8?"warn":"ok");}
+  else o("sb",R.sb,"%",2);}
+ else if(p==="mim"){g("Moldeo por inyección");o("load",+v.load,"% vol",1);o("tfill",R.tFill,"s",1);o("fi",R.fimax,"",2,R.fimax>1?"bad":R.fimax>0.6?"warn":"ok");o("tdeb",R.tdeb,"h",1,R.tdeb>24?"warn":"ok");}
+ else{g("Consolidación");o("Pav",R.Pavg,"MPa",0);o("Dg",R.Dstart*100,"%",1,undefined,"Densidad inicial");}
+ g("Ciclo térmico y microestructura");o("dT",R.dTmax,"K",1,R.dTmax>80?"bad":R.dTmax>35?"warn":"ok");o("tcic",R.tcyc,"min",0);o("xn",f.x,"",2,f.x<0.3?"warn":"ok");
+ o("df",f.Df*100,"%",1);o("dfg",f.gcc,"g/cm³",2,undefined,"Densidad absoluta final");
+ if(p==="hp"||p==="sps") o("shrh",(1-R.Dstart/f.Df)*100,"%",1);else o("shr",f.shr*100,"%",1,f.shr>0.2?"warn":"ok");
+ o("gr",f.g,"µm",1);g("Propiedades estimadas");o("hv",f.hv,"HV",0);o("uts",f.uts,"MPa",0);o("sy",f.sy,"MPa",0);o("el",f.el,"%",1);o("em",f.E,"GPa",0);o("kt",f.k,"W/m·K",1);o("iacs",IACS(f.se),"% IACS",1);o("pc",f.pc,"%",0);o("masa",f.mass,"g",1);
+ return O;}
+function renderResults(){const R=S.R,v=S.v;S.outs=outputs(R);
+ const vd=R.verdict,VERD={ok:"Viable",warn:"Viable con observaciones",bad:"Con fallas críticas"};$("verdictBadge").className="badge "+vd;$("verdictBadge").textContent=VERD[vd];
+ $("verdictTxt").textContent=`${EXAMPLES[S.ex]?EXAMPLES[S.ex].n+": ":""}${PROCS[v.proc].short}, ${GEOS[v.geo].name.toLowerCase()}, ${matById(v.mat).name}. Densidad final ${fmt(R.fin.Df*100,1)} %.`;
+ $("stageTitle").textContent=PROCS[v.proc].name;$("stageSub").textContent=`${GEOS[v.geo].name} · masa ${fmt(R.fin.mass,1)} g · ${fmt(R.G.vol_cm3,2)} cm³`;
+ $("diag").innerHTML=R.diag.map(d=>`<div class="dcard ${d.lv}"><div class="f">${d.t}</div><div class="c">${d.c}</div>${d.f?`<div class="m">${d.f}</div>`:""}</div>`).join("");
+ $("results").innerHTML=S.outs.map(o=>Array.isArray(o)?`<div class="rgroup">${o[0]}</div>`:`<div class="rcard ${o.st||""}"><div class="t"><span>${o.lab||V[o.k].n}</span>${ib(o.k)}</div><div class="v" ${typeof o.v==="string"?'style="font-size:.95rem;font-weight:600"':""}>${typeof o.v==="number"?fmt(o.v,o.d):o.v}<small>${o.u||""}</small></div></div>`).join("");}
+const COSTK=[["cMat","Polvo","--c1"],["cEq","Consolidación","--c2"],["cHorno","Horno","--c3"],["cMO","Mano de obra","--c4"],["cE","Energía","--c5"],["cHer","Herramental","--steel-2"]];
+function renderCosts(){const C=S.R.C,R=S.R;
+ $("costBar").innerHTML=COSTK.map(([k,,c])=>`<div style="width:${Math.max(0,C[k]/C.tot*100)}%;background:var(${c})"></div>`).join("");
+ $("costTbl").innerHTML=`<tr><th>Componente</th><th class="n">COP/pieza</th><th class="n">%</th></tr>`+COSTK.map(([k,n,c])=>`<tr><td><span class="sw" style="background:var(${c})"></span>${n} ${ib(k)}</td><td class="n">${money(C[k])}</td><td class="n">${fmt(C[k]/C.tot*100,1)}</td></tr>`).join("")+`<tr><td><b>Costo unitario</b> ${ib("cTot")}</td><td class="n"><b>${money(C.tot)}</b></td><td class="n">100</td></tr>`;
+ $("costLot").innerHTML=`<tr><th>Producción</th><th class="n">Valor</th></tr><tr><td>Costo por kg de pieza</td><td class="n">${money(C.kg)}</td></tr><tr><td>Masa de la pieza</td><td class="n">${fmt(R.fin.mass,1)} g</td></tr><tr><td>Energía por pieza</td><td class="n">${fmt(C.kWh,2)} kWh</td></tr><tr><td>Duración del ciclo térmico</td><td class="n">${fmt(R.tcyc,0)} min</td></tr><tr><td>Piezas por ciclo de horno</td><td class="n">${fmt(C.batch,0)}</td></tr><tr><td>Costo del lote</td><td class="n">${money(C.tot*S.v.lote)}</td></tr>`;}
+/* ================= ESCENA, HUD Y SONDA ================= */
+function curFrame(){const R=S.R;return clamp(S.t*(R.frames.length-1),0,R.frames.length-1);}
+function drawFrame(){if(!S.R||!$("tab-lab").classList.contains("active")) return;const R=S.R,fi=curFrame(),cv=$("sim");
+ if(S.probe.k<0) S.probe.k=R.cen;
+ const {fr,key}=drawSim(cv,R,fi,{field:S.fld,vec:S.vec,probe:S.probe});
+ drawCbar($("cbar"),R,key);const L=cbarLabels(R,key);$("cbA").textContent=L.a;$("cbB").textContent=L.b;$("cbN").textContent=L.n;
+ const idx=Math.round(fi);$("stagebar").innerHTML=R.stages.map(s=>`<div class="${idx>=s.i0&&idx<=s.i1?"on":""}">${s.n}</div>`).join("");
+ const G=R.G,Da=wavg(G,fr.D),dr=frange(G,fr.D),tr=frange(G,fr.T),thermal=fr.st!=="press"&&fr.st!=="eject"&&fr.st!=="inject"&&fr.st!=="debind";
+ const tm=fr.t<120?fmt(fr.t,1)+" s":fr.t<7200?fmt(fr.t/60,1)+" min":fmt(fr.t/3600,2)+" h";
+ const cells=[["Etapa",R.stages.find(s=>idx>=s.i0&&idx<=s.i1).n],["Tiempo",tm],["Presión",fr.P>0?fmt(fr.P,0)+" MPa":"—"],["T de control",thermal||fr.st==="inject"?fmt(fr.Tc,0)+" °C":"—"],["Densidad media",fmt(Da*100,1)+" %"],[thermal?"ΔT centro-superficie":"Δ de densidad",thermal?fmt(tr[1]-tr[0],1)+" K":fmt((dr[1]-dr[0])*100,1)+" pp"]];
+ $("hud").innerHTML=cells.map(([a,b])=>`<div>${a}<b>${b}</b></div>`).join("");
+ $("progLbl").textContent=`${cells[0][1]} · ${tm}`;updateProbe(fr);}
+function updateProbe(fr){const R=S.R,k=S.probe.k;if(k<0||!R.G.mask[k]) return;const i=k%R.G.nx,j=(k-i)/R.G.nx,x=(-R.G.W/2+(i+0.5)*R.G.dx),z=(j+0.5)*R.G.dz;
+ const d0=clamp(0.5*R.B.dEff,0.3,200),thermal=fr.st!=="press"&&fr.st!=="eject"&&fr.st!=="inject"&&fr.st!=="debind";
+ drawMicro($("micro"),fr.x[k]||0,fr.D[k]||0.5,R.Dstart,Math.cbrt(Math.max(fr.g[k],d0)/d0));
+ $("probeTxt").textContent=`Posición r = ${fmt(Math.abs(x),1)} mm, z = ${fmt(z,1)} mm`;
+ const p=propsAt(R.M,fr.D[k],fr.x[k],Math.max(fr.g[k],0.3));
+ const cells=[["σz",fmt(fr.sig[k],0)+" MPa"],["Densidad",fmt(fr.D[k]*100,1)+" %"],["Temperatura",isFinite(fr.T[k])?fmt(fr.T[k],0)+" °C":"—"],["Razón de cuello",fmt(fr.x[k],2)],["Grano",thermal?fmt(fr.g[k],1)+" µm":"—"],["Dureza",thermal?fmt(p.hv,0)+" HV":"—"]];
+ $("pv").innerHTML=cells.map(([a,b])=>`<div>${a}<b>${b}</b></div>`).join("");}
+$("sim").addEventListener("click",e=>{if(!S.R) return;const k=pickCell($("sim"),S.R,e);if(k>=0){S.probe.k=k;drawFrame();}});
+/* ================= REPRODUCCIÓN ================= */
+let raf2=0,lastTs=0;
+function tick(ts){if(!S.playing) return;const dt=lastTs?Math.min(50,ts-lastTs):16;lastTs=ts;S.t+=parseFloat($("spdSel").value)*dt/16;if(S.t>=1){S.t=1;S.playing=false;$("playBtn").textContent="▶ Simular";}
+ $("prog").value=Math.round(S.t*1000);drawFrame();if(S.playing) raf2=requestAnimationFrame(tick);}
+$("playBtn").onclick=()=>{if(S.playing){S.playing=false;$("playBtn").textContent="▶ Simular";return;}if(S.t>=0.999) S.t=0;S.playing=true;lastTs=0;$("playBtn").textContent="❚❚ Pausa";raf2=requestAnimationFrame(tick);};
+$("prog").oninput=e=>{S.t=e.target.value/1000;S.playing=false;$("playBtn").textContent="▶ Simular";drawFrame();};
+/* ================= CURVAS ================= */
+function drawCharts(){const R=S.R;if(!R||!$("tab-lab").classList.contains("active")) return;const cv=R.cv,v=R.v,p=v.proc,blue="#2F5E93",acc=css("--accent"),grn="#2A7A4B",pur="#8E44AD",org="#D68910";
+ const s1=[{x:cv.heck.P,y:cv.heck.id,c:blue,n:"Sin fricción"}];if(p==="prensa") s1.push({x:cv.heck.P,y:cv.heck.ac,c:acc,n:"Con fricción (promedio)",dash:[6,3]});
+ if(p==="hp"||p==="sps"||p==="hip") s1.push({x:cv.heck.P,y:cv.heck.ht,c:grn,n:"A "+v.T+" °C"});
+ const o1={s:s1,xl:"Presión (MPa)",yl:"Densidad relativa",ymin:0.2,ymax:1,leg:true};
+ if(p==="mim") o1.hl=[{y:+v.load/100,c:acc,t:"Carga de sólidos Φ"},{y:R.B.Dtap,c:grn,t:"Carga crítica"}];else o1.pts=[{x:v.P,y:R.Dgavg}];
+ chart($("ch1"),o1);
+ chart($("ch2"),{s:[{x:cv.prop.D,y:cv.prop.s,c:acc,n:"Resistencia"},{x:cv.prop.D,y:cv.prop.e,c:blue,n:"Módulo E"},{x:cv.prop.D,y:cv.prop.k,c:grn,n:"Conductividad"},{x:cv.prop.D,y:cv.prop.a,c:pur,n:"Alargamiento"}],xl:"Densidad relativa",yl:"Propiedad / propiedad del denso",ymin:0,ymax:1,vl:[{x:R.fin.Df,t:"pieza"}],leg:true});
+ chart($("ch3"),{s:[{x:cv.temp.T,y:cv.temp.D,c:blue,n:"Densidad"},{x:cv.temp.T,y:cv.temp.U,c:acc,n:"σu (MPa)",ax:2}],xl:"Temperatura (°C)",yl:"Densidad relativa",y2:true,y2l:"σu (MPa)",ymax:1,vl:[{x:+v.T,t:"actual"}],leg:true});
+ chart($("ch4"),{s:[{x:cv.size.d,y:cv.size.D,c:blue,n:"Densidad final"},{x:cv.size.d,y:cv.size.S,c:org,n:"Contracción %",ax:2}],logx:true,xl:"Tamaño de polvo (µm)",yl:"Densidad relativa",y2:true,y2l:"Contracción (%)",ymax:1,vl:[{x:clamp(R.B.d32,1,200),t:"mezcla"}],leg:true});
+ chart($("ch5"),{s:[{x:cv.perf.z,y:cv.perf.gi,c:"#888",n:"Verde, interior",dash:[5,3]},{x:cv.perf.z,y:cv.perf.gw,c:"#BBB",n:"Verde, pared",dash:[2,3]},{x:cv.perf.z,y:cv.perf.fi,c:acc,n:"Final, interior"},{x:cv.perf.z,y:cv.perf.fw,c:blue,n:"Final, pared"}],xl:"Altura z (mm)",yl:"Densidad relativa",leg:true});
+ const ts=cv.ciclo,fr=R.frames[Math.round(curFrame())],vl=[];if(fr&&(fr.st==="sinter"||fr.st==="hp"||fr.st==="sps"||fr.st==="hip")) vl.push({x:fr.t/60,t:"ahora"});
+ chart($("ch6"),{s:[{x:ts.t,y:ts.Tc,c:"#888",n:"Control",dash:[6,3]},{x:ts.t,y:ts.Tcen,c:acc,n:"Centro"},{x:ts.t,y:ts.Tsur,c:blue,n:"Superficie"},{x:ts.t,y:ts.D,c:grn,n:"Densidad",ax:2}],xl:"Tiempo (min)",yl:"Temperatura (°C)",y2:true,y2l:"Densidad",vl,leg:true});}
+</script>
+<script>
+"use strict";
+/* ================= GUÍA ================= */
+const GC={};
+function ensureR(i){if(!GC[i]){const R=evaluate(loadExample(i));computeRanges(R);R.gmax=calcGmax(R);GC[i]=R;}return GC[i];}
+function drawGuide(){const art=document.querySelector("#tab-guia article.active");if(!art) return;
+ art.querySelectorAll(".gcanvas").forEach(cv=>{
+  if(cv.dataset.ex!==undefined){const R=ensureR(+cv.dataset.ex),f=parseFloat(cv.dataset.fr)*(R.frames.length-1);drawSim(cv,R,f,{field:cv.dataset.fld||"auto",vec:cv.dataset.vec==="1",probe:{k:-1}});}
+  else if(cv.dataset.kind==="pack"){const B=blend({d1:60,y1:62,m1:"irr",d2:9,y2:26,m2:"irr",d3:1.5,y3:12,m3:"irr",sg:1.25});drawPacking(cv,B,5);}
+  else if(cv.dataset.kind==="micro3"){const {c,w,h}=prep(cv,cv.clientHeight||240),bgc=css("--surface-2");c.fillStyle=bgc;c.fillRect(0,0,w,h);const st=[[0.12,0.65,1],[0.55,0.82,1],[0.9,0.97,1.8]],names=["Contactos iniciales","Cuellos formados","Poros cerrándose"],tmp=document.createElement("canvas"),pw=(w-40)/3,sz=Math.min(pw,h-40);
+   st.forEach((q,i)=>{drawMicro(tmp,q[0],q[1],0.65,q[2]);c.drawImage(tmp,10+i*(pw+10)+(pw-sz)/2,8,sz,sz);c.fillStyle=css("--ink");c.font="12px system-ui,sans-serif";c.textAlign="center";c.fillText(names[i],10+i*(pw+10)+pw/2,sz+26);});}
+ });
+ const gm=$("gMorph");if(gm&&!gm.innerHTML) gm.innerHTML=Object.entries(MORPH).map(([k,m])=>`<div class="mcard">${morphSVG(k)}<b>${m.n}</b>${m.src}</div>`).join("");}
+document.querySelectorAll("#gnav button").forEach(b=>b.onclick=()=>{document.querySelectorAll("#gnav button").forEach(x=>x.removeAttribute("aria-current"));b.setAttribute("aria-current","true");
+ document.querySelectorAll("#tab-guia article").forEach(a=>a.classList.toggle("active",a.dataset.g===b.dataset.g));drawGuide();});
+/* ================= PESTAÑA POLVOS ================= */
+const BLENDS=[{n:"Irregular 75 µm",o:{d1:75,m1:"irr",y1:100,y2:0,y3:0}},{n:"Bimodal 75 + 10 µm",o:{d1:75,m1:"irr",y1:75,d2:10,m2:"irr",y2:25,y3:0}},{n:"Trimodal 75 / 10 / 2 µm",o:{d1:75,m1:"irr",y1:62,d2:10,m2:"irr",y2:26,d3:2,m3:"irr",y3:12}},{n:"Esférico fino (MIM) 15 µm",o:{d1:15,m1:"esf",y1:100,y2:0,y3:0}},{n:"Esférico bimodal 25 + 4 µm",o:{d1:25,m1:"esf",y1:72,d2:4,m2:"esf",y2:28,y3:0}},{n:"Esponjoso 100 µm",o:{d1:100,m1:"esp",y1:100,y2:0,y3:0}},{n:"Dendrítico 45 µm",o:{d1:45,m1:"den",y1:100,y2:0,y3:0}}];
+const METH=[["Atomización con gas","Esférica","5–150 µm","Ti, Ni, inoxidables, aluminio","Alto"],["Atomización con agua","Irregular / redondeada","20–200 µm","Hierro, aceros, bronce","Bajo"],["Electrólisis","Dendrítica","10–100 µm","Cobre, hierro de alta pureza","Medio"],["Reducción de óxidos","Esponjosa","30–150 µm","Hierro, tungsteno, molibdeno","Bajo"],["Carbonilo","Esférica fina","1–10 µm","Hierro y níquel para MIM","Alto"],["Molienda de alta energía","Escamas","1–100 µm","Aleado mecánico, compuestos","Medio"],["Secado por aspersión","Granulada","50–200 µm","Carburos cementados","Medio"],["Atomización con plasma","Esférica muy pura","15–150 µm","Titanio para fabricación aditiva","Muy alto"]];
+function renderPowder(){if(!S.R) return;const R=S.R,B=R.B,v=S.v,M=R.M;
+ $("blendPre").innerHTML=BLENDS.map((b,i)=>`<button class="chip" data-b="${i}">${b.n}</button>`).join("");
+ $("blendPre").querySelectorAll(".chip").forEach(c=>c.onclick=()=>{Object.assign(S.v,BLENDS[+c.dataset.b].o);S.ex=null;syncInputs();renderEx();compute(true);renderPowder();});
+ const c=B.cdf,mx=Math.max(...c.f);chart($("dist"),{s:[{x:c.L,y:c.f.map(z=>z/mx),c:"#C8642B",n:"Frecuencia"},{x:c.L,y:c.F,c:"#2F5E93",n:"Acumulado",ax:2}],logx:true,xmin:Math.max(0.3,B.d10/4),xmax:Math.min(600,B.d90*4),xl:"Tamaño de partícula (µm)",yl:"Frecuencia relativa",y2:true,y2l:"Acumulado",y2min:0,y2max:1,ymin:0,vl:[{x:B.d50,t:"d50"},{x:B.d32,t:"d32",c:"#2A7A4B"}],leg:true});
+ const op=optimBinary(v),cur=(+v.y1+ +v.y2)>0?(+v.y2/((+v.y1)+(+v.y2))):0;
+ chart($("lpm"),{s:[{x:op.curve.map(z=>z[0]*100),y:op.curve.map(z=>z[1]*100),c:"#C8642B",n:"Mezcla 1 + 2"}],xl:"Fracción fina (% del volumen)",yl:"Empaquetamiento con golpeteo (%)",vl:[{x:cur*100,t:"actual"},{x:op.best.y*100,t:"óptimo",c:"#2A7A4B"}]});
+ const area=drawPacking($("packv"),B,7);$("packTxt").textContent=`· área ocupada ${fmt(area*100,0)} %`;
+ const O=[["dapp",B.Dapp*100,"%",1],["dtap",B.Dtap*100,"%",1],["haus",B.HR,"",2],["hall",isFinite(B.tH)?B.tH:"No fluye",isFinite(B.tH)?"s/50 g":"",1],["d32",B.d32,"µm",1],["d50",B.d50,"µm",1],["sv",6/((M.rho/1000)*B.dEff),"m²/g",2]];
+ $("powRes").innerHTML=`<div class="rgroup">Propiedades de la mezcla actual</div>`+O.map(([k,val,u,d])=>`<div class="rcard"><div class="t"><span>${V[k].n}</span>${ib(k)}</div><div class="v" ${typeof val==="string"?'style="font-size:.95rem;font-weight:600"':""}>${typeof val==="number"?fmt(val,d):val}<small>${u}</small></div></div>`).join("")+`<div class="rcard ok"><div class="t"><span>Fracción fina óptima (1 y 2)</span>${ib("phi")}</div><div class="v">${fmt(op.best.y*100,0)}<small>% → φ ${fmt(op.best.phi*100,0)} %</small></div></div><div class="rcard"><div class="t"><span>Densidad en verde resultante</span>${ib("Dg")}</div><div class="v">${fmt(R.Dgavg*100,1)}<small>%</small></div></div>`;
+ $("morph").innerHTML=Object.entries(MORPH).map(([k,m])=>`<div class="mcard">${morphSVG(k)}<b>${m.n}</b>Empaquetamiento suelto ${fmt(m.bl*100,0)} %, con golpeteo ${fmt(m.bt*100,0)} %. Esfericidad ${fmt(m.psi,2)}. Resistencia en verde ${m.gs>=0.8?"alta":m.gs>=0.4?"media":"baja"}.</div>`).join("");
+ $("methTbl").innerHTML=`<tr><th>Método</th><th>Forma</th><th>Tamaño</th><th>Materiales</th><th>Costo</th></tr>`+METH.map(r=>`<tr>${r.map(x=>`<td>${x}</td>`).join("")}</tr>`).join("");}
+$("optBtn").onclick=()=>{const v=S.v,op=optimBinary(Object.assign({},v,{d2:Math.max(0.5,v.d1/7),m2:v.m1}));v.d2=Math.max(0.5,+(v.d1/7).toFixed(1));v.m2=v.m1;v.y2=Math.round(op.best.y*100);v.y1=100-v.y2;v.y3=0;S.ex=null;syncInputs();renderEx();compute(true);renderPowder();toast(`Mezcla óptima: ${v.y2} % de ${v.d2} µm`);};
+/* ================= PESTAÑA MATERIALES ================= */
+function renderMatTab(){
+ $("matTable").innerHTML=`<tr><th>Material</th><th class="n">ρ (g/cm³)</th><th class="n">T<sub>m</sub> (°C)</th><th class="n">T sinter. (°C)</th><th class="n">P<sub>y</sub> (MPa)</th><th class="n">σ<sub>u</sub> (MPa)</th><th class="n">HV</th><th class="n">E (GPa)</th><th class="n">k (W/m·K)</th><th class="n">Precio (COP/kg)</th></tr>`+MATS.map(m=>`<tr data-id="${m.id}" style="cursor:pointer"><td><b>${m.name}</b></td><td class="n">${fmt(m.rho/1000,2)}</td><td class="n">${fmt(m.Tm,0)}</td><td class="n">${fmt(m.Ts,0)}</td><td class="n">${fmt(m.Py,0)}</td><td class="n">${fmt(m.UTS,0)}</td><td class="n">${fmt(m.HV,0)}</td><td class="n">${fmt(m.E,0)}</td><td class="n">${fmt(m.k,1)}</td><td class="n">${fmt(m.price,0)}</td></tr>`).join("");
+ $("matTable").querySelectorAll("tr[data-id]").forEach(r=>r.onclick=()=>{const M=matById(r.dataset.id),v=S.v;v.mat=M.id;v.d1=M.d;v.m1=M.mo;Object.assign(v,procDefaults(v.proc,M));S.ex=null;S.resetT=true;showTab("lab");renderAll();});
+ const pal=["#2F5E93","#C0392B","#2A7A4B","#8E44AD","#D68910","#16A085","#7F8C8D","#E67E22","#34495E","#D35400","#1ABC9C","#9B59B6","#C8642B","#2C3E50"];
+ const Bref=blend({d1:60,y1:100,m1:"irr",d2:10,y2:0,m2:"irr",d3:2,y3:0,m3:"irr",sg:1.4}),Ps=[],sH=[],sS=[];for(let i=0;i<=30;i++) Ps.push(1000*i/30);
+ MATS.forEach((m,ix)=>{const hk=heckelPar(m,Bref,Bref.Dapp);sH.push({x:Ps,y:Ps.map(P=>Dof(P,hk.A,hk.K)),c:pal[ix%pal.length],n:m.name.split(" (")[0].slice(0,20)});
+  const B20=blend({d1:20,y1:100,m1:"esf",d2:10,y2:0,m2:"irr",d3:2,y3:0,m3:"irr",sg:1.3}),hs=[],xs=[];for(let i=0;i<=24;i++){const h=0.45+0.5*i/24,T=h*(m.Tm+273.15)-273.15;const r=sinter0D(m,B20,{},{proc:"prensa",T,t:60,hr:10,atm:m.atm[0],fld:false,P:0,Dg:0.8,Jm:1});xs.push(h);hs.push(r.xi);}
+  sS.push({x:xs,y:hs,c:pal[ix%pal.length],n:m.name.split(" (")[0].slice(0,20)});});
+ chart($("cmH"),{s:sH,xl:"Presión (MPa)",yl:"Densidad en verde",ymin:0.3,ymax:1,leg:true});
+ chart($("cmS"),{s:sS,xl:"Temperatura homóloga T/T_m",yl:"Avance de densificación ξ",ymin:0,ymax:1});}
+$("matForm").onsubmit=e=>{e.preventDefault();const f=new FormData(e.target),o={};f.forEach((v,k)=>o[k]=v);const cls=o.cls,Ts=+o.Ts,ATMD={fer:["n2h2","h2"],inox:["h2","vac"],cu:["n2h2","h2"],al:["n2","vac"],ti:["vac","ar"],ni:["vac","h2"],ref:["h2","vac"],car:["vac","h2"]};
+ const m={id:"u"+Date.now(),name:o.name,cls,rho:+o.rho,Tm:+o.Tm,Tl:0,Ts,Th:Ts-100,Thip:Ts-100,Py:+o.Py,sy:0.6*o.UTS,UTS:+o.UTS,HV:+o.HV,E:+o.E,A:10,k:+o.k,cp:500,se:5,Qs:+o.Qs,act:1,Kg:1e10,gam:2,Dmax:0.97,price:+o.price,d:50,mo:"irr",atm:ATMD[cls]||["n2h2"]};
+ MATS.push(m);const u=lsGet("pm_mats",[]);u.push(m);lsSet("pm_mats",u);renderMatTab();renderMat();toast("Material agregado");};
+/* ================= INFORME ================= */
+function offCanvas(w,h){const d=document.createElement("div");d.style.cssText="position:absolute;left:-9999px;top:0;width:"+w+"px;height:"+h+"px";const c=document.createElement("canvas");c.style.cssText="width:"+w+"px;height:"+h+"px;display:block";d.appendChild(c);document.body.appendChild(d);return {c,rm:()=>d.remove()};}
+function snapSim(R,fi,fld){const o=offCanvas(640,340);const {fr}=drawSim(o.c,R,fi,{field:fld||"auto",vec:true,probe:{k:-1}});const u=o.c.toDataURL("image/png");o.rm();return u;}
+function snapChart(fn){const o=offCanvas(440,260);fn(o.c);const u=o.c.toDataURL("image/png");o.rm();return u;}
+function readMeta(){["est","grupo","curso","obs"].forEach(k=>{const el=$("rm_"+k);if(el) S.meta[k]=el.value;});}
+function renderReport(){if(!S.R) return;readMeta();const R=S.R,v=S.v,M=R.M,f=R.fin,B=R.B,now=new Date().toLocaleDateString("es-CO",{year:"numeric",month:"long",day:"numeric"});
+ const st=R.stages,idxOf=k=>{const s=st.find(x=>x.k===k);return s?s.i1:R.frames.length-1;};
+ const ims=[],first=v.proc==="prensa"||v.proc==="cip"?idxOf("press"):v.proc==="mim"?Math.round(st[0].i1*0.7):Math.round((R.frames.length-1)*0.4);
+ ims.push(["Etapa de conformado o rampa de calentamiento ("+(R.frames[first].st)+")",snapSim(R,first)]);
+ ims.push(["Densidad al final del proceso",snapSim(R,R.frames.length-1,"dens")]);
+ ims.push(["Dureza final por zonas",snapSim(R,R.frames.length-1,"hv")]);
+ const c=R.cv,acc="#C8642B",blue="#2F5E93",grn="#2A7A4B";
+ ims.push(["Compresibilidad",snapChart(cv=>chart(cv,{s:[{x:c.heck.P,y:c.heck.id,c:blue,n:"Sin fricción"},{x:c.heck.P,y:c.heck.ac,c:acc,n:"Con fricción",dash:[5,3]}],xl:"Presión (MPa)",ymin:0.2,ymax:1,leg:true,pts:[{x:v.P,y:R.Dgavg}]}))]);
+ ims.push(["Propiedades contra densidad",snapChart(cv=>chart(cv,{s:[{x:c.prop.D,y:c.prop.s,c:acc,n:"Resistencia"},{x:c.prop.D,y:c.prop.e,c:blue,n:"E"},{x:c.prop.D,y:c.prop.k,c:grn,n:"k"}],xl:"Densidad relativa",ymin:0,ymax:1,leg:true,vl:[{x:f.Df}]}))]);
+ ims.push(["Efecto de la temperatura de sinterizado",snapChart(cv=>chart(cv,{s:[{x:c.temp.T,y:c.temp.D,c:blue,n:"Densidad"},{x:c.temp.T,y:c.temp.U,c:acc,n:"σu",ax:2}],xl:"Temperatura (°C)",y2:true,ymax:1,leg:true,vl:[{x:+v.T}]}))]);
+ ims.push(["Ciclo térmico",snapChart(cv=>chart(cv,{s:[{x:c.ciclo.t,y:c.ciclo.Tc,c:"#888",n:"Control",dash:[5,3]},{x:c.ciclo.t,y:c.ciclo.Tcen,c:acc,n:"Centro"},{x:c.ciclo.t,y:c.ciclo.Tsur,c:blue,n:"Superficie"},{x:c.ciclo.t,y:c.ciclo.D,c:grn,n:"Densidad",ax:2}],xl:"Tiempo (min)",y2:true,leg:true}))]);
+ const VERD={ok:"Viable",warn:"Viable con observaciones",bad:"Con fallas críticas"};
+ const cond=[["Proceso",PROCS[v.proc].name],["Pieza",GEOS[v.geo].name+" · "+fmt(R.G.vol_cm3,2)+" cm³"],["Material",M.name],["Mezcla",B.cl.map(k=>`${fmt(k.y*100,0)} % de ${fmt(k.d,1)} µm (${k.m.n.split(" (")[0].toLowerCase()})`).join("; ")],["Presión",v.proc==="mim"?"Inyección, carga de sólidos "+v.load+" %":fmt(v.P,0)+" MPa"],["Temperatura y tiempo",`${v.T} °C durante ${v.t} min a ${v.hr} K/min`],["Atmósfera",ATMS.find(a=>a[0]===v.atm)[1]]];
+ const concl=[];
+ concl.push(`La pieza de ${M.name.toLowerCase()} alcanza una densidad final de ${fmt(f.Df*100,1)} % (${fmt(f.gcc,2)} g/cm³) con razón de cuello ${fmt(f.x,2)}.`);
+ concl.push(`Dureza estimada ${fmt(f.hv,0)} HV y resistencia a la tracción ${fmt(f.uts,0)} MPa, frente a ${fmt(M.UTS,0)} MPa del material denso.`);
+ if(v.proc==="prensa"||v.proc==="cip") concl.push(`La densidad en verde es ${fmt(R.Dgavg*100,1)} % con un gradiente de ${fmt((R.DgR[1]-R.DgR[0])*100,1)} puntos.`);
+ concl.push(`El gradiente térmico máximo durante el ciclo es ${fmt(R.dTmax,1)} K y el costo unitario ${money(R.C.tot)}.`);
+ const top=R.diag.find(d=>d.lv==="bad")||R.diag.find(d=>d.lv==="warn");if(top) concl.push(`Principal alerta: ${top.t}. Mejora sugerida: ${top.f}`);
+ $("report").innerHTML=`<h2>Informe de laboratorio de metalurgia de polvos</h2><p style="color:var(--ink-2)">${EXAMPLES[S.ex]?EXAMPLES[S.ex].n+" · ":""}${PROCS[v.proc].name} · ${now}</p>
+ <div class="rep-meta"><label>Estudiante<input id="rm_est" value="${S.meta.est||""}"></label><label>Grupo<input id="rm_grupo" value="${S.meta.grupo||""}"></label><label>Curso<input id="rm_curso" value="${S.meta.curso||""}"></label></div>
+ <h3>1. Objetivo</h3><p>Analizar cómo la forma y el tamaño del polvo, la presión, la temperatura y el proceso elegido determinan la densidad, la microestructura y las propiedades de una pieza.</p>
+ <h3>2. Condiciones del ensayo</h3><div class="tblwrap"><table class="tbl">${cond.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join("")}</table></div>
+ <h3>3. Resultados</h3><div class="tblwrap"><table class="tbl">${S.outs.map(o=>Array.isArray(o)?`<tr><th colspan="2">${o[0]}</th></tr>`:`<tr><td>${o.lab||V[o.k].n}</td><td class="n">${typeof o.v==="number"?fmt(o.v,o.d):o.v} ${o.u||""}</td></tr>`).join("")}</table></div>
+ <h3>4. Diagnóstico: fallas posibles y mejoras</h3><p><span class="badge ${R.verdict}">${VERD[R.verdict]}</span></p><div class="tblwrap"><table class="tbl"><tr><th>Nivel</th><th>Falla</th><th>Causa</th><th>Mejora propuesta</th></tr>${R.diag.map(d=>`<tr><td><span class="badge ${d.lv}">${d.lv==="bad"?"Crítica":d.lv==="warn"?"Advertencia":d.lv==="ok"?"Correcto":"Información"}</span></td><td>${d.t}</td><td>${d.c}</td><td>${d.f}</td></tr>`).join("")}</table></div>
+ <h3>5. Simulación y curvas</h3><div class="rep-imgs">${ims.map(([cp,s])=>`<figure><img src="${s}" alt="${cp}" style="width:100%"><figcaption>${cp}</figcaption></figure>`).join("")}</div>
+ <h3>6. Costos</h3><div class="tblwrap"><table class="tbl"><tr><th>Componente</th><th class="n">COP/pieza</th><th class="n">%</th></tr>${COSTK.map(([k,n])=>`<tr><td>${n}</td><td class="n">${money(R.C[k])}</td><td class="n">${fmt(R.C[k]/R.C.tot*100,1)}</td></tr>`).join("")}<tr><td><b>Total</b></td><td class="n"><b>${money(R.C.tot)}</b></td><td class="n">100</td></tr></table></div>
+ <h3>7. Conclusiones automáticas</h3><ul>${concl.map(x=>`<li>${x}</li>`).join("")}</ul>
+ <h3>8. Observaciones del estudiante</h3><textarea id="rm_obs" placeholder="¿Qué cambiarías para aumentar la densidad, reducir la contracción o bajar el costo? Justifica con los resultados.">${S.meta.obs||""}</textarea>
+ <h3>9. Comparación de ensayos guardados</h3>${S.runs.length?`<div class="tblwrap"><table class="tbl"><tr><th>#</th><th>Pieza</th><th>Proceso</th><th>Material</th><th class="n">P (MPa)</th><th class="n">T (°C)</th><th class="n">D final (%)</th><th class="n">HV</th><th class="n">σu (MPa)</th><th class="n">ΔT (K)</th><th class="n">COP/pieza</th></tr>${S.runs.map((r,i)=>`<tr><td>${i+1}</td><td>${r.geo}</td><td>${r.proc}</td><td>${r.mat}</td><td class="n">${fmt(r.P,0)}</td><td class="n">${fmt(r.T,0)}</td><td class="n">${fmt(r.D,1)}</td><td class="n">${fmt(r.hv,0)}</td><td class="n">${fmt(r.uts,0)}</td><td class="n">${fmt(r.dT,1)}</td><td class="n">${money(r.c)}</td></tr>`).join("")}</table></div>`:`<p style="color:var(--ink-2)">Aún no hay ensayos guardados: usa «Agregar ensayo al informe» en el laboratorio.</p>`}
+ <h3>10. Referencias</h3><p style="font-size:.88rem">R. M. German, Sintering Theory and Practice. R. W. Heckel, Trans. AIME 221 (1961). F. de Larrard, Concrete Mixture Proportioning. H. Su y D. L. Johnson, J. Am. Ceram. Soc. 79 (1996). Helle, Easterling y Ashby, Acta Metall. 33 (1985). ASM Handbook, Vol. 7, Powder Metal Technologies and Applications.</p>`;
+ ["est","grupo","curso","obs"].forEach(k=>{const el=$("rm_"+k);if(el) el.addEventListener("input",()=>{S.meta[k]=el.value;lsSet("pm_meta",S.meta);});});}
+$("saveRun").onclick=()=>{if(!S.R) return;const R=S.R,v=S.v;S.runs.push({geo:GEOS[v.geo].name,proc:PROCS[v.proc].short,mat:R.M.name,P:v.P,T:v.T,D:R.fin.Df*100,hv:R.fin.hv,uts:R.fin.uts,dT:R.dTmax,c:R.C.tot});lsSet("pm_runs",S.runs);toast("Ensayo agregado al informe ("+S.runs.length+")");};
+$("clearRuns").onclick=()=>{S.runs=[];lsSet("pm_runs",[]);renderReport();toast("Ensayos borrados");};
+$("refreshRep").onclick=()=>renderReport();$("printBtn").onclick=()=>{renderReport();setTimeout(()=>window.print(),200);};
+$("goRep").onclick=()=>showTab("rep");$("goGuide").onclick=()=>showTab("guia");
+/* ================= TABS, TEMA E INICIO ================= */
+function showTab(t){document.querySelectorAll(".tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===t));
+ document.querySelectorAll(".tab").forEach(s=>s.classList.toggle("active",s.id==="tab-"+t));
+ if(t!=="lab"&&S.playing){S.playing=false;$("playBtn").textContent="▶ Simular";}
+ if(t==="lab"){drawFrame();drawCharts();}if(t==="guia") drawGuide();if(t==="pol") renderPowder();if(t==="mat") renderMatTab();if(t==="rep") renderReport();window.scrollTo(0,0);}
+document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
+function effDark(){const t=document.documentElement.dataset.theme;if(t) return t==="dark";return matchMedia("(prefers-color-scheme: dark)").matches;}
+$("themeBtn").onclick=()=>{const d=effDark()?"light":"dark";document.documentElement.dataset.theme=d;lsSet("pm_theme",d);drawFrame();drawCharts();drawGuide();if($("tab-mat").classList.contains("active")) renderMatTab();if($("tab-pol").classList.contains("active")) renderPowder();};
+(function init(){const th=lsGet("pm_theme",null);if(th) document.documentElement.dataset.theme=th;
+ lsGet("pm_mats",[]).forEach(m=>{if(m&&m.id&&!MATS.find(x=>x.id===m.id)) MATS.push(m);});
+ S.runs=lsGet("pm_runs",[]);S.meta=Object.assign({},S.meta,lsGet("pm_meta",{}));
+ loadEx(1);renderAll();
+ let raf=0;new ResizeObserver(()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{if($("tab-lab").classList.contains("active")){drawFrame();drawCharts();}if($("tab-guia").classList.contains("active")) drawGuide();});}).observe($("sim"));
+ if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>{drawFrame();drawCharts();});})();
+</script>
+</body>
+</html>
